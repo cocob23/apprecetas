@@ -1,0 +1,58 @@
+package com.example.demo.models;
+
+import jakarta.persistence.*;
+
+@Entity
+public class PuntuacionReceta {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    private Usuario usuario;
+
+    @ManyToOne
+    private Receta receta;
+
+    private Integer puntuacion; // del 1 al 5
+
+    public PuntuacionReceta() {}
+
+    public PuntuacionReceta(Usuario usuario, Receta receta, Integer puntuacion) {
+        this.usuario = usuario;
+        this.receta = receta;
+        this.puntuacion = puntuacion;
+    }
+
+    // Getters y setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public Receta getReceta() {
+        return receta;
+    }
+
+    public void setReceta(Receta receta) {
+        this.receta = receta;
+    }
+
+    public Integer getPuntuacion() {
+        return puntuacion;
+    }
+
+    public void setPuntuacion(Integer puntuacion) {
+        this.puntuacion = puntuacion;
+    }
+}
+
