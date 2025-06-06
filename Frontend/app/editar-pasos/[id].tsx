@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -39,6 +40,29 @@ export default function EditarPasosScreen() {
     if (recetaId) cargarPasos();
   }, [recetaId]);
 
+  const subirImagenPaso = async (localId) => {
+    const result = await ImagePicker.launchImageLibraryAsync({ base64: true });
+    if (!result.canceled) {
+      try {
+        const imagen = result.assets[0];
+        const res = await axios.post('https://api.imgur.com/3/image', {
+          image: imagen.base64,
+          type: 'base64',
+        }, {
+          headers: {
+            Authorization: 'Client-ID 5b70aab1b41270b'
+          }
+        });
+        const url = res.data.data.link;
+        actualizarPaso(localId, 'imagenUrl', url);
+        Alert.alert("¡Imagen subida!");
+      } catch (err) {
+        console.error(err);
+        Alert.alert("Error al subir imagen");
+      }
+    }
+  };
+
   const guardarCambiosPaso = async (id, paso) => {
     if (!paso.descripcion.trim()) {
       Alert.alert("Error", "La descripción del paso no puede estar vacía");
@@ -58,7 +82,6 @@ export default function EditarPasosScreen() {
           numero: paso.numero,
           descripcion: paso.descripcion,
           imagenUrl: paso.imagenUrl,
-          videoUrl: paso.videoUrl,
         });
       } else {
         await axios.put(`http://192.168.0.232:8081/pasos/${id}/editar`, paso);
@@ -87,29 +110,28 @@ export default function EditarPasosScreen() {
     }
   };
 
-const agregarPaso = () => {
-  const numerosExistentes = pasos.map(p => Number(p.numero)).sort((a, b) => a - b);
+  const agregarPaso = () => {
+    const numerosExistentes = pasos.map(p => Number(p.numero)).sort((a, b) => a - b);
 
-  let nuevoNumero = 1;
-  for (let i = 1; i <= numerosExistentes.length + 1; i++) {
-    if (!numerosExistentes.includes(i)) {
-      nuevoNumero = i;
-      break;
+    let nuevoNumero = 1;
+    for (let i = 1; i <= numerosExistentes.length + 1; i++) {
+      if (!numerosExistentes.includes(i)) {
+        nuevoNumero = i;
+        break;
+      }
     }
-  }
 
-  const nuevoPaso = {
-    id: null,
-    recetaId,
-    numero: nuevoNumero,
-    descripcion: '',
-    imagenUrl: '',
-    videoUrl: '',
-    localId: `nuevo-${Date.now()}`
+    const nuevoPaso = {
+      id: null,
+      recetaId,
+      numero: nuevoNumero,
+      descripcion: '',
+      imagenUrl: '',
+      localId: `nuevo-${Date.now()}`
+    };
+
+    setPasos(prev => ordenarPorNumero([...prev, nuevoPaso]));
   };
-
-  setPasos(prev => ordenarPorNumero([...prev, nuevoPaso]));
-};
 
   const actualizarPaso = (localId, campo, valor) => {
     setPasos(prev =>
@@ -129,18 +151,10 @@ const agregarPaso = () => {
         value={item.descripcion}
         onChangeText={text => actualizarPaso(item.localId, 'descripcion', text)}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Imagen URL"
-        value={item.imagenUrl || ''}
-        onChangeText={text => actualizarPaso(item.localId, 'imagenUrl', text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Video URL"
-        value={item.videoUrl || ''}
-        onChangeText={text => actualizarPaso(item.localId, 'videoUrl', text)}
-      />
+      <TouchableOpacity onPress={() => subirImagenPaso(item.localId)} style={styles.subirBtn}>
+        <Text style={styles.guardar}>📷 Subir imagen</Text>
+      </TouchableOpacity>
+      {item.imagenUrl ? <Text style={{ color: '#aaa', marginTop: 4 }}>✔ Imagen subida</Text> : null}
       <View style={styles.botones}>
         <TouchableOpacity onPress={() => guardarCambiosPaso(item.id, item)}>
           <Text style={styles.guardar}>💾 Guardar</Text>
@@ -186,7 +200,7 @@ const styles = StyleSheet.create({
   pasoBox: { backgroundColor: '#222', padding: 15, marginBottom: 15, borderRadius: 10 },
   numero: { color: '#fff', fontSize: 16, marginBottom: 5, fontWeight: 'bold' },
   input: { backgroundColor: '#333', color: '#fff', padding: 10, borderRadius: 8, marginBottom: 10 },
-  botones: { flexDirection: 'row', justifyContent: 'space-between' },
+  botones: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
   guardar: { color: '#31c48d', fontWeight: 'bold' },
   eliminar: { color: 'red', fontWeight: 'bold' },
   finalizarBtn: {
@@ -209,4 +223,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+  subirBtn: {
+    backgroundColor: '#444',
+    padding: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  }
 });

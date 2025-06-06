@@ -108,6 +108,8 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
     marginBottom: 30,
+    height: 40,
+    borderRadius: 20,
   },
   autoresContainer: {
     flexDirection: 'row',

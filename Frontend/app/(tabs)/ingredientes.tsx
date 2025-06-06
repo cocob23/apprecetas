@@ -159,8 +159,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#222',
     color: '#fff',
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 20,
     marginBottom: 30,
+    height: 40,
   },
   seleccionadosContainer: {
     flexDirection: 'row',

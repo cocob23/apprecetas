@@ -28,7 +28,8 @@ public class Usuario {
     @JsonIgnore 
     private List<Receta> recetas;
 
-    // --- Getters y Setters ---
+    @Column(name = "foto_perfil", length = 255)
+    private String fotoPerfil;
 
     public Long getId() {
         return id;
@@ -76,5 +77,13 @@ public class Usuario {
 
     public void setRecetas(List<Receta> recetas) {
         this.recetas = recetas;
+    }
+    
+    public String getFotoPerfil() {
+        return fotoPerfil;
+    }
+
+    public void setFotoPerfil(String fotoPerfil) {
+        this.fotoPerfil = fotoPerfil;
     }
 }

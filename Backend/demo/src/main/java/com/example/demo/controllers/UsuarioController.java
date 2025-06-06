@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -69,6 +71,25 @@ public class UsuarioController {
 	    } else {
 	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
 	    }
+	}
+	
+	@PutMapping("/{id}/foto")
+	public ResponseEntity<?> actualizarFoto(@PathVariable Long id, @RequestParam String url) {
+	    Optional<Usuario> optionalUsuario = usuarioService.findById(id);
+	    if (optionalUsuario.isPresent()) {
+	        Usuario usuario = optionalUsuario.get();
+	        usuario.setFotoPerfil(url);
+	        usuarioService.guardar(usuario);
+	        return ResponseEntity.ok("Foto de perfil actualizada");
+	    } else {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+	    }
+	}
+	
+	@GetMapping("/{id}")
+	public ResponseEntity<?> obtenerUsuario(@PathVariable Long id) {
+	    Optional<Usuario> usuario = usuarioService.findById(id);
+	    return usuario.isPresent() ? ResponseEntity.ok(usuario.get()) : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
 	}
 
 }

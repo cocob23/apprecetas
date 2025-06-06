@@ -107,9 +107,6 @@ const limpiarBusqueda = async () => {
       </TouchableOpacity>
     )}
   </View>
-
-  <Image source={require('../../assets/icons/bell.png')} style={styles.icon} />
-  <Image source={require('../../assets/icons/menu.png')} style={styles.icon} />
 </View>
 
       <Text style={styles.title}>Recetas recientes</Text>
@@ -167,6 +164,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
+    marginTop: 20
   },
   logo: {
     width: 40,

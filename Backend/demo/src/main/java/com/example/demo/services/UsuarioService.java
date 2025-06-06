@@ -62,5 +62,9 @@ public class UsuarioService {
     public Optional<Usuario> findById(Long id) {
         return usuarioRepository.findById(id);
     }
+    
+    public void guardar(Usuario usuario) {
+        usuarioRepository.save(usuario);
+    }
 
 }
