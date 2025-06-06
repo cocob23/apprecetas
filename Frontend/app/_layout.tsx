@@ -24,6 +24,9 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="recuperar" options={{ headerShown: false }} />
         <Stack.Screen name="not-found" />
+        <Stack.Screen name="editar-receta/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="editar-pasos/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="editar-ingredientes/[id]" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

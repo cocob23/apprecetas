@@ -196,7 +196,7 @@ export default function EditarPasosScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#111', padding: 20 },
-  title: { color: '#fff', fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
+  title: { color: '#fff', fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center', marginTop: 40 },
   pasoBox: { backgroundColor: '#222', padding: 15, marginBottom: 15, borderRadius: 10 },
   numero: { color: '#fff', fontSize: 16, marginBottom: 5, fontWeight: 'bold' },
   input: { backgroundColor: '#333', color: '#fff', padding: 10, borderRadius: 8, marginBottom: 10 },
