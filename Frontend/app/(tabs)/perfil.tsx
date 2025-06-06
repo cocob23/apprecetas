@@ -114,7 +114,7 @@ export default function PerfilScreen() {
             </LinearGradient>
           </TouchableOpacity>
 
-          <Text style={styles.invited}>Ingresar como invitado</Text>
+
         </View>
       </SafeAreaView>
     );

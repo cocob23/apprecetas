@@ -1,9 +1,8 @@
-import RNPickerSelect from 'react-native-picker-select';
-
 import axios from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import RNPickerSelect from 'react-native-picker-select';
 import { AuthContext } from '../AuthContext';
 
 export default function EditarRecetaScreen() {
@@ -67,7 +66,8 @@ export default function EditarRecetaScreen() {
       <TextInput style={styles.input} keyboardType="numeric" value={porciones} onChangeText={setPorciones} />
 
       <Text style={styles.subTitle}>Tipo</Text>
-      <View style={styles.input}>
+      <View style={styles.pickerWrapper}>
+
   <RNPickerSelect
     placeholder={{ label: 'Seleccioná un tipo', value: null }}
     onValueChange={(value) => setTipo(value)}
@@ -81,37 +81,39 @@ export default function EditarRecetaScreen() {
     ]}
     useNativeAndroidPickerStyle={false}
     style={{
-      inputIOS: {
-        color: '#fff',
-        paddingVertical: 12,
-        paddingHorizontal: 10,
-        borderRadius: 8,
-        height: 15
-      },
       inputAndroid: {
         color: '#fff',
         paddingVertical: 12,
         paddingHorizontal: 10,
-        borderRadius: 8,
-        height: 15
+      },
+      inputIOS: {
+        color: 'fff',
+        paddingVertical: 12,
+        paddingHorizontal: 10,
+      },
+      placeholder: {
+        color: '#aaa',
+      },
+      viewContainer: {
+        flex: 1,
       },
       iconContainer: {
-        top: 5,
+        top: 15,
         right: 10,
       },
     }}
     Icon={() => <Text style={{ color: '#fff' }}>▼</Text>}
   />
+
 </View>
+
       <TouchableOpacity onPress={() => router.push(`/editar-pasos/${recetaId}`)}>
         <Text style={{ color: '#31c48d' }}>✏️ Editar pasos</Text>
       </TouchableOpacity>
-      
+
       <TouchableOpacity onPress={() => router.push(`/editar-ingredientes/${recetaId}`)}>
         <Text style={{ color: '#31c48d', marginTop: 10 }}>✏️ Editar ingredientes</Text>
       </TouchableOpacity>
-
-
 
       <TouchableOpacity style={styles.button} onPress={guardarCambios}>
         <Text style={styles.buttonText}>Guardar Cambios</Text>
@@ -127,6 +129,11 @@ const styles = StyleSheet.create({
   button: { backgroundColor: '#31c48d', padding: 12, borderRadius: 10, marginTop: 10, alignItems: 'center' },
   buttonText: { color: '#fff', fontWeight: 'bold' },
   subTitle: { color: '#fff', fontSize: 18, marginBottom: 5, textAlign: 'left' },
-  pickerContainer: { backgroundColor: '#222', borderRadius: 8, marginBottom: 10 },
-  picker: { color: '#fff', height: 50, width: '100%' },
+  pickerWrapper: {
+  backgroundColor: '#222',
+  borderRadius: 8,
+  marginBottom: 5,
+  paddingHorizontal: 10,
+  paddingVertical: 5,
+},
 });

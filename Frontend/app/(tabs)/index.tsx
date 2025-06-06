@@ -1,19 +1,27 @@
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function InicioScreen() {
   const [recetasDestacadas, setRecetasDestacadas] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  const [busqueda, setBusqueda] = useState('');
   const [recetasOrdenadas, setRecetasOrdenadas] = useState([]);
   const [recetasFiltradas, setRecetasFiltradas] = useState([]);
+  const [busqueda, setBusqueda] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const router = useRouter();
 
-
-
-useEffect(() => {
   const cargarRecetas = async () => {
     try {
       const recientes = await axios.get('http://192.168.0.232:8081/recetas/recientes');
@@ -23,91 +31,82 @@ useEffect(() => {
 
       setRecetasDestacadas(recientes.data);
       setRecetasOrdenadas(ordenadas.data);
+      setRecetasFiltradas([]);
     } catch (error) {
       console.error('Error al cargar recetas:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
-  cargarRecetas();
-}, []);
+  useEffect(() => {
+    cargarRecetas();
+  }, []);
 
   const handleRecetaPress = (id) => {
     router.push(`../detalle-receta/${id}`);
   };
 
   const buscarRecetas = async () => {
-  if (!busqueda.trim()) return;
+    if (!busqueda.trim()) return;
 
-  setLoading(true);
-  try {
-    const res = await axios.get(`http://192.168.0.232:8081/recetas/buscar`, {
-      params: { nombre: busqueda.trim() }
-    });
-    setRecetasDestacadas(res.data); // usás el mismo arreglo para mostrar resultados
-  } catch (error) {
-    console.error('Error al buscar recetas:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+    setLoading(true);
+    try {
+      const res = await axios.get(`http://192.168.0.232:8081/recetas/buscar`, {
+        params: { nombre: busqueda.trim() }
+      });
+      setRecetasDestacadas(res.data);
+    } catch (error) {
+      console.error('Error al buscar recetas:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const filtrarPorTipo = async (tipo) => {
-  setBusqueda('');
-  setLoading(true);
-  try {
-    const res = await axios.get(`http://192.168.0.232:8081/recetas/tipo/${tipo}`);
-    setRecetasFiltradas(res.data);
-  } catch (error) {
-    console.error('Error al filtrar por tipo:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+  const filtrarPorTipo = async (tipo) => {
+    setBusqueda('');
+    setLoading(true);
+    try {
+      const res = await axios.get(`http://192.168.0.232:8081/recetas/tipo/${tipo}`);
+      setRecetasFiltradas(res.data);
+    } catch (error) {
+      console.error('Error al filtrar por tipo:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const limpiarBusqueda = async () => {
-  setBusqueda('');
-  setLoading(true);
-  try {
-    const res = await axios.get('http://192.168.0.232:8081/recetas/recientes');
-    setRecetasDestacadas(res.data);
-  } catch (error) {
-    console.error('Error al cargar recetas recientes:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+  const limpiarBusqueda = async () => {
+    setBusqueda('');
+    await cargarRecetas();
+  };
 
-  if (loading) {
-    return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}> 
-        <ActivityIndicator size="large" color="#31c48d" />
-      </View>
-    );
-  }
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await cargarRecetas();
+  };
 
-  return (
-    <ScrollView style={styles.container}>
+  const renderContenido = () => (
+    <View>
       <View style={styles.header}>
-  <Image source={require('../../assets/icons/logochef.png')} style={styles.logo} />
-
-  <View style={styles.searchContainer}>
-    <TextInput
-      placeholder="Buscar.."
-      placeholderTextColor="#aaa"
-      style={styles.search}
-      value={busqueda}
-      onChangeText={setBusqueda}
-      onSubmitEditing={buscarRecetas}
-    />
-    {busqueda !== '' && (
-      <TouchableOpacity onPress={limpiarBusqueda} style={styles.clearButton}>
-        <Text style={{ color: '#fff', fontSize: 16 }}>✖</Text>
-      </TouchableOpacity>
-    )}
-  </View>
-</View>
+        <Image source={require('../../assets/icons/logochef.png')} style={styles.logo} />
+        <View style={styles.searchContainer}>
+          <TextInput
+            placeholder="Buscar.."
+            placeholderTextColor="#aaa"
+            style={styles.search}
+            value={busqueda}
+            onChangeText={setBusqueda}
+            onSubmitEditing={buscarRecetas}
+          />
+          {busqueda !== '' && (
+            <TouchableOpacity onPress={limpiarBusqueda} style={styles.clearButton}>
+              <Text style={{ color: '#fff', fontSize: 16 }}>✖</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
 
       <Text style={styles.title}>Recetas recientes</Text>
       <ScrollView horizontal style={styles.carousel} showsHorizontalScrollIndicator={false}>
@@ -118,38 +117,59 @@ const limpiarBusqueda = async () => {
           </TouchableOpacity>
         ))}
       </ScrollView>
+
       <Text style={styles.title}>Recetas ordenadas A-Z</Text>
-<ScrollView horizontal style={styles.carousel} showsHorizontalScrollIndicator={false}>
-  {recetasOrdenadas.map((receta) => (
-    <TouchableOpacity key={receta.id} style={styles.recipeCardContainer} onPress={() => handleRecetaPress(receta.id)}>
-      <Image source={{ uri: receta.imagenUrl }} style={styles.recipeCard} />
-      <Text style={styles.recipeName}>{receta.nombre}</Text>
-    </TouchableOpacity>
-  ))}
-</ScrollView>
+      <ScrollView horizontal style={styles.carousel} showsHorizontalScrollIndicator={false}>
+        {recetasOrdenadas.map((receta) => (
+          <TouchableOpacity key={receta.id} style={styles.recipeCardContainer} onPress={() => handleRecetaPress(receta.id)}>
+            <Image source={{ uri: receta.imagenUrl }} style={styles.recipeCard} />
+            <Text style={styles.recipeName}>{receta.nombre}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
       <Text style={styles.title}>Explorar</Text>
       {recetasFiltradas.length > 0 && (
-  <>
-    <Text style={styles.title}>Recetas tipo: {recetasFiltradas[0]?.tipo}</Text>
-    <ScrollView horizontal style={styles.carousel} showsHorizontalScrollIndicator={false}>
-      {recetasFiltradas.map((receta) => (
-        <TouchableOpacity key={receta.id} style={styles.recipeCardContainer} onPress={() => handleRecetaPress(receta.id)}>
-          <Image source={{ uri: receta.imagenUrl }} style={styles.recipeCard} />
-          <Text style={styles.recipeName}>{receta.nombre}</Text>
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
-  </>
-)}
-<View style={styles.tagsContainer}>
-  {['Principal', 'Merienda', 'Postre', 'Desayuno', 'Entradas'].map((tag) => (
-    <TouchableOpacity key={tag} onPress={() => filtrarPorTipo(tag)}>
-      <Text style={styles.tag}>{tag}</Text>
-    </TouchableOpacity>
-  ))}
-</View>
-    </ScrollView>
+        <>
+          <Text style={styles.title}>Recetas tipo: {recetasFiltradas[0]?.tipo}</Text>
+          <ScrollView horizontal style={styles.carousel} showsHorizontalScrollIndicator={false}>
+            {recetasFiltradas.map((receta) => (
+              <TouchableOpacity key={receta.id} style={styles.recipeCardContainer} onPress={() => handleRecetaPress(receta.id)}>
+                <Image source={{ uri: receta.imagenUrl }} style={styles.recipeCard} />
+                <Text style={styles.recipeName}>{receta.nombre}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </>
+      )}
+
+      <View style={styles.tagsContainer}>
+        {['Principal', 'Merienda', 'Postre', 'Desayuno', 'Entradas'].map((tag) => (
+          <TouchableOpacity key={tag} onPress={() => filtrarPorTipo(tag)}>
+            <Text style={styles.tag}>{tag}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+
+  if (loading && !refreshing) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#31c48d" />
+      </View>
+    );
+  }
+
+  return (
+    <FlatList
+      style={styles.container}
+      data={[]} // dummy data para usar FlatList
+      keyExtractor={() => 'key'}
+      ListHeaderComponent={renderContenido()}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+    />
   );
 }
 
@@ -224,16 +244,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   searchContainer: {
-  flex: 1,
-  position: 'relative',
-  marginRight: 10,
-},
-clearButton: {
-  position: 'absolute',
-  right: 10,
-  top: 8,
-  padding: 4,
-  zIndex: 1,
-},
-
+    flex: 1,
+    position: 'relative',
+    marginRight: 10,
+  },
+  clearButton: {
+    position: 'absolute',
+    right: 10,
+    top: 8,
+    padding: 4,
+    zIndex: 1,
+  },
 });

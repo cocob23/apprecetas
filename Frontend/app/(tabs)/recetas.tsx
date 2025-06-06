@@ -11,6 +11,7 @@ export default function RecetasScreen() {
 
   const cargarRecetas = async () => {
     try {
+      if (!usuario) return;
       const res = await axios.get("http://192.168.0.232:8081/recetas/mias", {
         params: { usuarioId: usuario.id }
       });
@@ -45,43 +46,62 @@ export default function RecetasScreen() {
   useEffect(() => {
     if (usuario?.id) {
       cargarRecetas();
+    } else {
+      setRecetas([]); // Limpia recetas si se desloguea
     }
   }, [usuario]);
 
-return (
-  <View style={styles.container}>
-    <Text style={styles.text}>Mis recetas</Text>
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>Mis recetas</Text>
 
-    <FlatList
-      contentContainerStyle={{ paddingBottom: 100 }}
-      data={recetas}
-      keyExtractor={(item) => item.id.toString()}
-      renderItem={({ item }) => (
-        <View style={styles.recetaBox}>
-          <TouchableOpacity onPress={() => router.push(`/detalle-receta/${item.id}`)}>
-            <Image source={{ uri: item.imagenUrl }} style={styles.imagen} />
-          </TouchableOpacity>
-          <View style={styles.tituloYBoton}>
-            <Text style={styles.recetaNombre}>{item.nombre}</Text>
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              <TouchableOpacity onPress={() => router.push(`/editar-receta/${item.id}`)}>
-                <Text style={styles.editarTexto}>✏️</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => eliminarReceta(item.id)}>
-                <Text style={styles.eliminarTexto}>🗑️</Text>
+      {usuario ? (
+        <>
+          {recetas.length > 0 ? (
+            <FlatList
+              contentContainerStyle={{ paddingBottom: 100 }}
+              data={recetas}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.recetaBox}>
+                  <TouchableOpacity onPress={() => router.push(`/detalle-receta/${item.id}`)}>
+                    <Image source={{ uri: item.imagenUrl }} style={styles.imagen} />
+                  </TouchableOpacity>
+                  <View style={styles.tituloYBoton}>
+                    <Text style={styles.recetaNombre}>{item.nombre}</Text>
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <TouchableOpacity onPress={() => router.push(`/editar-receta/${item.id}`)}>
+                        <Text style={styles.editarTexto}>✏️</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => eliminarReceta(item.id)}>
+                        <Text style={styles.eliminarTexto}>🗑️</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              )}
+              ListFooterComponent={
+                <TouchableOpacity style={styles.agregarBtn} onPress={() => router.push('/nueva-receta')}>
+                  <Text style={styles.agregarTxt}>➕ Añadir receta</Text>
+                </TouchableOpacity>
+              }
+            />
+          ) : (
+            <View style={{ alignItems: 'center', marginTop: 30 }}>
+              <Text style={{ color: '#ccc' }}>Aún no cargaste recetas.</Text>
+              <TouchableOpacity style={styles.agregarBtn} onPress={() => router.push('/nueva-receta')}>
+                <Text style={styles.agregarTxt}>➕ Añadir receta</Text>
               </TouchableOpacity>
             </View>
-          </View>
+          )}
+        </>
+      ) : (
+        <View style={{ alignItems: 'center', marginTop: 50 }}>
+          <Text style={{ color: '#ccc', fontSize: 16 }}>Iniciá sesión para ver tus recetas.</Text>
         </View>
       )}
-      ListFooterComponent={
-        <TouchableOpacity style={styles.agregarBtn} onPress={() => router.push('/nueva-receta')}>
-          <Text style={styles.agregarTxt}>➕ Añadir receta</Text>
-        </TouchableOpacity>
-      }
-    />
-  </View>
-);
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

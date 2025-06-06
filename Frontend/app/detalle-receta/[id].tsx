@@ -20,6 +20,7 @@ export default function DetalleRecetaScreen() {
   const { id } = useLocalSearchParams();
   const recetaId = Array.isArray(id) ? parseInt(id[0]) : parseInt(id);
   const { usuario } = useContext(AuthContext);
+
   const [receta, setReceta] = useState(null);
   const [comentarios, setComentarios] = useState([]);
   const [nuevoComentario, setNuevoComentario] = useState('');
@@ -31,7 +32,6 @@ export default function DetalleRecetaScreen() {
   const [pasos, setPasos] = useState([]);
   const [ingredientes, setIngredientes] = useState([]);
 
-
   const cargarDatos = async () => {
     try {
       const recetaRes = await axios.get(`http://192.168.0.232:8081/recetas/${recetaId}`);
@@ -41,22 +41,26 @@ export default function DetalleRecetaScreen() {
       const pasosRes = await axios.get(`http://192.168.0.232:8081/pasos/por-receta?recetaId=${recetaId}`);
       const ingredientesRes = await axios.get(`http://192.168.0.232:8081/recetas/${recetaId}/ingredientes`);
 
-
       let miPuntaje = 0;
-      try {
-        const yaPuntuoRes = await axios.get(`http://192.168.0.232:8081/puntuaciones/usuario`, {
-          params: { usuarioId: usuario.id, recetaId }
-        });
-        if (yaPuntuoRes.data !== null) {
-          miPuntaje = yaPuntuoRes.data;
-        }
-      } catch (err) {
-        miPuntaje = 0;
-      }
+      let likeExiste = false;
 
-      const likeExiste = await axios.get(`http://192.168.0.232:8081/recetas/${recetaId}/liked`, {
-        params: { usuarioId: usuario.id }
-      });
+      if (usuario) {
+        try {
+          const yaPuntuoRes = await axios.get(`http://192.168.0.232:8081/puntuaciones/usuario`, {
+            params: { usuarioId: usuario.id, recetaId }
+          });
+          if (yaPuntuoRes.data !== null) {
+            miPuntaje = yaPuntuoRes.data;
+          }
+        } catch (err) {
+          miPuntaje = 0;
+        }
+
+        const likeRes = await axios.get(`http://192.168.0.232:8081/recetas/${recetaId}/liked`, {
+          params: { usuarioId: usuario.id }
+        });
+        likeExiste = likeRes.data;
+      }
 
       setReceta(recetaRes.data);
       setLikes(likesRes.data);
@@ -64,10 +68,11 @@ export default function DetalleRecetaScreen() {
       setPromedioPuntuacion(puntuacionRes.data);
       setMiPuntuacion(miPuntaje);
       setPasos(pasosRes.data);
-      setMeGusta(likeExiste.data);
+      setMeGusta(likeExiste);
       setIngredientes(ingredientesRes.data);
     } catch (error) {
       console.error('Error al cargar los datos:', error);
+      Alert.alert("Error", "No se pudieron cargar los datos");
     } finally {
       setLoading(false);
     }
@@ -78,6 +83,7 @@ export default function DetalleRecetaScreen() {
   }, [id]);
 
   const manejarLike = async () => {
+    if (!usuario) return Alert.alert("Iniciá sesión para dar like");
     try {
       if (meGusta) {
         await axios.delete(`http://192.168.0.232:8081/recetas/${recetaId}/dislike`, {
@@ -95,6 +101,7 @@ export default function DetalleRecetaScreen() {
   };
 
   const manejarPuntuacion = async (valor) => {
+    if (!usuario) return Alert.alert("Iniciá sesión para puntuar");
     try {
       await axios.post(`http://192.168.0.232:8081/puntuaciones/guardar`, null, {
         params: {
@@ -110,7 +117,9 @@ export default function DetalleRecetaScreen() {
   };
 
   const manejarComentario = async () => {
+    if (!usuario) return Alert.alert("Iniciá sesión para comentar");
     if (!nuevoComentario.trim()) return;
+
     try {
       await axios.post(`http://192.168.0.232:8081/comentarios/agregar`, {
         recetaId,
@@ -185,12 +194,13 @@ export default function DetalleRecetaScreen() {
           ))}
         </View>
       </View>
-          <Text style={styles.sectionTitle}>Ingredientes</Text>
-            {ingredientes.map((ing, index) => ( 
-          <Text key={index} style={{ color: '#eee', marginBottom: 4 }}>
-            • {ing.nombre} ({ing.cantidad})
-          </Text>
-        ))}
+
+      <Text style={styles.sectionTitle}>Ingredientes</Text>
+      {ingredientes.map((ing, index) => (
+        <Text key={index} style={{ color: '#eee', marginBottom: 4 }}>
+          • {ing.nombre} ({ing.cantidad})
+        </Text>
+      ))}
 
       <Text style={styles.sectionTitle}>Pasos</Text>
       {pasos.map((paso, index) => (
@@ -206,40 +216,36 @@ export default function DetalleRecetaScreen() {
         </View>
       ))}
 
-<Text style={styles.sectionTitle}>Comentarios</Text>
-<View style={styles.commentsContainer}>
-  <ScrollView nestedScrollEnabled>
-    {comentarios.map((com, index) => (
-      <View key={index} style={styles.commentRow}>
-        <Text style={styles.comment}>
-          • <Text style={styles.alias}>{com.aliasUsuario}:</Text> {com.comentario}
-        </Text>
-        {com.usuarioId === usuario.id && (
-          <TouchableOpacity onPress={() => eliminarComentario(com.id)}>
-            <Text style={styles.deleteIcon}>🗑️</Text>
-          </TouchableOpacity>
-        )}
+      <Text style={styles.sectionTitle}>Comentarios</Text>
+      <View style={styles.commentsContainer}>
+        <ScrollView nestedScrollEnabled>
+          {comentarios.map((com, index) => (
+            <View key={index} style={styles.commentRow}>
+              <Text style={styles.comment}>
+                • <Text style={styles.alias}>{com.aliasUsuario}:</Text> {com.comentario}
+              </Text>
+              {usuario && com.usuarioId === usuario.id && (
+                <TouchableOpacity onPress={() => eliminarComentario(com.id)}>
+                  <Text style={styles.deleteIcon}>🗑️</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          ))}
+        </ScrollView>
       </View>
-    ))}
-  </ScrollView>
- 
-</View>
 
-<TextInput
-  style={styles.commentInput}
-  placeholder="Agregá un comentario"
-  placeholderTextColor="#aaa"
-  value={nuevoComentario}
-  onChangeText={setNuevoComentario}
-/>
-<TouchableOpacity style={styles.commentButton} onPress={manejarComentario}>
-  <Text style={styles.commentButtonText}>Comentar</Text>
-</TouchableOpacity>
- 
+      <TextInput
+        style={styles.commentInput}
+        placeholder="Agregá un comentario"
+        placeholderTextColor="#aaa"
+        value={nuevoComentario}
+        onChangeText={setNuevoComentario}
+      />
+      <TouchableOpacity style={styles.commentButton} onPress={manejarComentario}>
+        <Text style={styles.commentButtonText}>Comentar</Text>
+      </TouchableOpacity>
     </ScrollView>
-    
   );
-  
 }
 
 const styles = StyleSheet.create({
@@ -249,32 +255,28 @@ const styles = StyleSheet.create({
   title: { color: '#fff', fontSize: 24, fontWeight: 'bold', marginTop: 15 },
   subtitle: { color: '#ccc', fontSize: 16, marginBottom: 10 },
   text: { color: '#eee', marginVertical: 5 },
-  likes: { color: '#fff', marginTop: 10 },
-  likeButton: { backgroundColor: '#333', padding: 10, borderRadius: 10, marginTop: 5, alignItems: 'center' },
-  likeText: { color: '#fff' },
   sectionTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginTop: 20 },
-  commentsBox: { maxHeight: 200, marginVertical: 10 },
   comment: { color: '#ccc', marginTop: 5, flex: 1 },
   alias: { fontWeight: 'bold', color: '#fff' },
   commentInput: { backgroundColor: '#222', color: '#fff', padding: 10, borderRadius: 10, marginTop: 10 },
   commentButton: { backgroundColor: '#31c48d', padding: 10, borderRadius: 10, marginTop: 10, alignItems: 'center' },
   commentButtonText: { color: '#fff', fontWeight: 'bold' },
   commentsContainer: {
-  backgroundColor: '#1a1a1a',
-  height: 200,
-  padding: 10,
-  borderRadius: 10,
-  marginVertical: 10,
-},
-commentRow: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: 5,
-},
-deleteIcon: {
-  color: 'red',
-  marginLeft: 8,
-  fontSize: 16,
-},
+    backgroundColor: '#1a1a1a',
+    height: 200,
+    padding: 10,
+    borderRadius: 10,
+    marginVertical: 10,
+  },
+  commentRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  deleteIcon: {
+    color: 'red',
+    marginLeft: 8,
+    fontSize: 16,
+  },
 });
