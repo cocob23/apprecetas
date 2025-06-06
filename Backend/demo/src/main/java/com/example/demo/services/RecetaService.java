@@ -15,9 +15,13 @@ import com.example.demo.models.Usuario;
 import com.example.demo.models.LikeReceta;
 import com.example.demo.repositories.IngredienteRepository;
 import com.example.demo.repositories.LikeRecetaRepository;
+import com.example.demo.repositories.PuntuacionRecetaRepository;
 import com.example.demo.repositories.RecetaIngredienteRepository;
 import com.example.demo.repositories.RecetaRepository;
 import com.example.demo.repositories.UsuarioRepository;
+import com.example.demo.services.UsuarioService;
+
+import jakarta.transaction.Transactional;
 @Service
 public class RecetaService {
 
@@ -28,6 +32,10 @@ public class RecetaService {
     @Autowired
     private IngredienteRepository ingredienteRepository;
 	private LikeRecetaRepository likeRecetaRepository;
+	@Autowired
+	private UsuarioService usuarioService;
+	@Autowired
+	private PuntuacionRecetaRepository puntuacionRecetaRepository;
 
     @Autowired
     public RecetaService(RecetaRepository recetaRepository, UsuarioRepository usuarioRepository, LikeRecetaRepository likeRecetaRepository) {
@@ -120,10 +128,13 @@ public class RecetaService {
         return likeRecetaRepository.countByReceta(receta);
     }
     
-    public void eliminarReceta(Long recetaId) {
-        Receta receta = recetaRepository.findById(recetaId)
+    @Transactional
+    public void eliminarReceta(Long id) {
+        Receta receta = recetaRepository.findById(id)
             .orElseThrow(() -> new NoSuchElementException("Receta no encontrada"));
-        recetaRepository.delete(receta);
+
+        puntuacionRecetaRepository.deleteByRecetaId(id); // 💥 esto elimina las puntuaciones
+        recetaRepository.delete(receta); // ahora sí, podés eliminar la receta
     }
     
     public Receta editarReceta(Long id, Receta datosNuevos) {
@@ -144,6 +155,13 @@ public class RecetaService {
     
     public boolean existeLike(Usuario usuario, Receta receta) {
         return likeRecetaRepository.existsByUsuarioAndReceta(usuario, receta);
+    }
+
+    public List<Receta> obtenerRecetasDelUsuario(Long usuarioId) {
+        Usuario usuario = usuarioService.findById(usuarioId)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return recetaRepository.findByUsuario(usuario);
     }
 
 

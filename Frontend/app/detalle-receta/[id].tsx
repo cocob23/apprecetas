@@ -28,6 +28,7 @@ export default function DetalleRecetaScreen() {
   const [promedioPuntuacion, setPromedioPuntuacion] = useState(0);
   const [loading, setLoading] = useState(true);
   const [miPuntuacion, setMiPuntuacion] = useState(0);
+  const [pasos, setPasos] = useState([]);
 
   const cargarDatos = async () => {
     try {
@@ -35,6 +36,7 @@ export default function DetalleRecetaScreen() {
       const likesRes = await axios.get(`http://192.168.0.232:8081/recetas/${recetaId}/likes`);
       const comentariosRes = await axios.get(`http://192.168.0.232:8081/comentarios/aprobados?recetaId=${recetaId}`);
       const puntuacionRes = await axios.get(`http://192.168.0.232:8081/puntuaciones/promedio?recetaId=${recetaId}`);
+      const pasosRes = await axios.get(`http://192.168.0.232:8081/pasos/por-receta?recetaId=${recetaId}`);
 
       let miPuntaje = 0;
       try {
@@ -57,6 +59,7 @@ export default function DetalleRecetaScreen() {
       setComentarios(comentariosRes.data);
       setPromedioPuntuacion(puntuacionRes.data);
       setMiPuntuacion(miPuntaje);
+      setPasos(pasosRes.data);
       setMeGusta(likeExiste.data);
     } catch (error) {
       console.error('Error al cargar los datos:', error);
@@ -177,6 +180,20 @@ export default function DetalleRecetaScreen() {
           ))}
         </View>
       </View>
+
+      <Text style={styles.sectionTitle}>Pasos</Text>
+      {pasos.map((paso, index) => (
+        <View key={index} style={{ marginBottom: 10 }}>
+          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Paso {paso.numero}:</Text>
+          <Text style={{ color: '#eee' }}>{paso.descripcion}</Text>
+          {paso.imagenUrl && (
+            <Image source={{ uri: paso.imagenUrl }} style={{ height: 150, borderRadius: 8, marginTop: 5 }} />
+          )}
+          {paso.videoUrl && (
+            <Text style={{ color: '#4cc9f0', marginTop: 5 }}>🎥 Video: {paso.videoUrl}</Text>
+          )}
+        </View>
+      ))}
 
       <Text style={styles.sectionTitle}>Comentarios</Text>
       <View style={styles.commentsBox}>

@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.models.Receta;
+import com.example.demo.models.Usuario;
 
 @Repository
 public interface RecetaRepository extends JpaRepository<Receta, Long> {
@@ -18,5 +19,6 @@ public interface RecetaRepository extends JpaRepository<Receta, Long> {
 	@Query("SELECT r FROM Receta r JOIN RecetaIngrediente ri ON r.id = ri.receta.id JOIN Ingrediente i ON ri.ingrediente.id = i.id WHERE LOWER(i.nombre) LIKE LOWER(CONCAT('%', :nombre, '%'))")
 	List<Receta> findByIngredienteNombre(String nombre);
 	List<Receta> findTop5ByOrderByFechaCreacionDesc();
+	List<Receta> findByUsuario(Usuario usuario);
 
 }

@@ -171,6 +171,16 @@ public class RecetaController {
 	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Receta no encontrada");
 	    }
 	}
+	
+	@GetMapping("/mias")
+	public ResponseEntity<?> recetasDelUsuario(@RequestParam Long usuarioId) {
+	    try {
+	        List<Receta> recetas = recetaService.obtenerRecetasDelUsuario(usuarioId);
+	        return ResponseEntity.ok(recetas);
+	    } catch (RuntimeException e) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
+	    }
+	}
 
 
 

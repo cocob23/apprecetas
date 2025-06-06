@@ -40,7 +40,7 @@ export default function PerfilScreen() {
 
           <Text style={styles.label}>Email</Text>
 <LinearGradient
-  colors={['#8e2de2', '#31c48d']} // violeta a verde agua
+  colors={['#8e2de2', '#31c48d']} 
   start={{ x: 0, y: 0 }}
   end={{ x: 1, y: 0 }}
   style={styles.inputBorder}
@@ -57,7 +57,7 @@ export default function PerfilScreen() {
   <Text style={styles.label}>Contraseña</Text>
 
 <LinearGradient
-  colors={['#8e2de2', '#31c48d']} // violeta a verde agua
+  colors={['#8e2de2', '#31c48d']} 
   start={{ x: 0, y: 0 }}
   end={{ x: 1, y: 0 }}
   style={styles.inputBorder}
@@ -78,7 +78,7 @@ export default function PerfilScreen() {
 
             <TouchableOpacity onPress={handleLogin}>
               <LinearGradient
-                colors={['#8e2de2', '#31c48d']} // violeta → verde agua
+                colors={['#8e2de2', '#31c48d']} 
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.button}

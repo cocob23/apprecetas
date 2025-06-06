@@ -1,22 +1,142 @@
-import { StyleSheet, Text, View } from 'react-native';
+import axios from 'axios';
+import { useRouter } from 'expo-router';
+import { useContext, useEffect, useState } from 'react';
+import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { AuthContext } from '../AuthContext';
 
 export default function RecetasScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Mis recetas (en construcción)</Text>
-    </View>
-  );
+  const { usuario } = useContext(AuthContext);
+  const [recetas, setRecetas] = useState([]);
+  const router = useRouter();
+
+  const cargarRecetas = async () => {
+    try {
+      const res = await axios.get("http://192.168.0.232:8081/recetas/mias", {
+        params: { usuarioId: usuario.id }
+      });
+      setRecetas(res.data);
+    } catch (error) {
+      console.error('Error al cargar recetas del usuario:', error);
+    }
+  };
+
+  const eliminarReceta = (id: number) => {
+    Alert.alert(
+      "Eliminar receta",
+      "¿Estás seguro de que querés eliminar esta receta?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await axios.delete(`http://192.168.0.232:8081/recetas/${id}/eliminar`);
+              cargarRecetas();
+            } catch (error) {
+              console.error("Error al eliminar la receta:", error);
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  useEffect(() => {
+    if (usuario?.id) {
+      cargarRecetas();
+    }
+  }, [usuario]);
+
+return (
+  <View style={styles.container}>
+    <Text style={styles.text}>Mis recetas</Text>
+
+    <FlatList
+      contentContainerStyle={{ paddingBottom: 100 }}
+      data={recetas}
+      keyExtractor={(item) => item.id.toString()}
+      renderItem={({ item }) => (
+        <View style={styles.recetaBox}>
+          <TouchableOpacity onPress={() => router.push(`/detalle-receta/${item.id}`)}>
+            <Image source={{ uri: item.imagenUrl }} style={styles.imagen} />
+          </TouchableOpacity>
+          <View style={styles.tituloYBoton}>
+            <Text style={styles.recetaNombre}>{item.nombre}</Text>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <TouchableOpacity onPress={() => router.push(`/editar-receta/${item.id}`)}>
+                <Text style={styles.editarTexto}>✏️</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => eliminarReceta(item.id)}>
+                <Text style={styles.eliminarTexto}>🗑️</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
+      ListFooterComponent={
+        <TouchableOpacity style={styles.agregarBtn} onPress={() => router.push('/nueva-receta')}>
+          <Text style={styles.agregarTxt}>➕ Añadir receta</Text>
+        </TouchableOpacity>
+      }
+    />
+  </View>
+);
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#111',
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 20,
   },
   text: {
     color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+    marginTop: 40
+  },
+  recetaBox: {
+    backgroundColor: '#222',
+    borderRadius: 10,
+    marginBottom: 15,
+    overflow: 'hidden',
+  },
+  imagen: {
+    width: '100%',
+    height: 200,
+  },
+  tituloYBoton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+  },
+  recetaNombre: {
+    color: '#fff',
     fontSize: 18,
+    fontWeight: 'bold',
+  },
+  eliminarTexto: {
+    color: 'red',
+    fontSize: 18,
+  },
+  editarTexto: {
+    color: '#31c48d',
+    fontSize: 18,
+  },
+  agregarBtn: {
+    backgroundColor: '#31c48d',
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  agregarTxt: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
