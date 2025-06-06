@@ -29,6 +29,8 @@ export default function DetalleRecetaScreen() {
   const [loading, setLoading] = useState(true);
   const [miPuntuacion, setMiPuntuacion] = useState(0);
   const [pasos, setPasos] = useState([]);
+  const [ingredientes, setIngredientes] = useState([]);
+
 
   const cargarDatos = async () => {
     try {
@@ -37,6 +39,8 @@ export default function DetalleRecetaScreen() {
       const comentariosRes = await axios.get(`http://192.168.0.232:8081/comentarios/aprobados?recetaId=${recetaId}`);
       const puntuacionRes = await axios.get(`http://192.168.0.232:8081/puntuaciones/promedio?recetaId=${recetaId}`);
       const pasosRes = await axios.get(`http://192.168.0.232:8081/pasos/por-receta?recetaId=${recetaId}`);
+      const ingredientesRes = await axios.get(`http://192.168.0.232:8081/recetas/${recetaId}/ingredientes`);
+
 
       let miPuntaje = 0;
       try {
@@ -61,6 +65,7 @@ export default function DetalleRecetaScreen() {
       setMiPuntuacion(miPuntaje);
       setPasos(pasosRes.data);
       setMeGusta(likeExiste.data);
+      setIngredientes(ingredientesRes.data);
     } catch (error) {
       console.error('Error al cargar los datos:', error);
     } finally {
@@ -148,7 +153,7 @@ export default function DetalleRecetaScreen() {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       <Image source={{ uri: receta.imagenUrl }} style={styles.image} />
       <Text style={styles.title}>{receta.nombre}</Text>
       <Text style={styles.subtitle}>Por: {receta.usuario?.alias || 'Desconocido'}</Text>
@@ -180,6 +185,12 @@ export default function DetalleRecetaScreen() {
           ))}
         </View>
       </View>
+          <Text style={styles.sectionTitle}>Ingredientes</Text>
+            {ingredientes.map((ing, index) => ( 
+          <Text key={index} style={{ color: '#eee', marginBottom: 4 }}>
+            • {ing.nombre} ({ing.cantidad})
+          </Text>
+        ))}
 
       <Text style={styles.sectionTitle}>Pasos</Text>
       {pasos.map((paso, index) => (
@@ -195,36 +206,40 @@ export default function DetalleRecetaScreen() {
         </View>
       ))}
 
-      <Text style={styles.sectionTitle}>Comentarios</Text>
-      <View style={styles.commentsBox}>
-        <ScrollView nestedScrollEnabled>
-          {comentarios.map((com, index) => (
-            <View key={index} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={styles.comment}>
-                • <Text style={styles.alias}>{com.aliasUsuario}:</Text> {com.comentario}
-              </Text>
-              {com.usuarioId === usuario.id && (
-                <TouchableOpacity onPress={() => eliminarComentario(com.id)}>
-                  <Text style={{ color: 'red', marginLeft: 8 }}>🗑️</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          ))}
-        </ScrollView>
+<Text style={styles.sectionTitle}>Comentarios</Text>
+<View style={styles.commentsContainer}>
+  <ScrollView nestedScrollEnabled>
+    {comentarios.map((com, index) => (
+      <View key={index} style={styles.commentRow}>
+        <Text style={styles.comment}>
+          • <Text style={styles.alias}>{com.aliasUsuario}:</Text> {com.comentario}
+        </Text>
+        {com.usuarioId === usuario.id && (
+          <TouchableOpacity onPress={() => eliminarComentario(com.id)}>
+            <Text style={styles.deleteIcon}>🗑️</Text>
+          </TouchableOpacity>
+        )}
       </View>
+    ))}
+  </ScrollView>
+ 
+</View>
 
-      <TextInput
-        style={styles.commentInput}
-        placeholder="Agregá un comentario"
-        placeholderTextColor="#aaa"
-        value={nuevoComentario}
-        onChangeText={setNuevoComentario}
-      />
-      <TouchableOpacity style={styles.commentButton} onPress={manejarComentario}>
-        <Text style={styles.commentButtonText}>Comentar</Text>
-      </TouchableOpacity>
+<TextInput
+  style={styles.commentInput}
+  placeholder="Agregá un comentario"
+  placeholderTextColor="#aaa"
+  value={nuevoComentario}
+  onChangeText={setNuevoComentario}
+/>
+<TouchableOpacity style={styles.commentButton} onPress={manejarComentario}>
+  <Text style={styles.commentButtonText}>Comentar</Text>
+</TouchableOpacity>
+ 
     </ScrollView>
+    
   );
+  
 }
 
 const styles = StyleSheet.create({
@@ -244,4 +259,22 @@ const styles = StyleSheet.create({
   commentInput: { backgroundColor: '#222', color: '#fff', padding: 10, borderRadius: 10, marginTop: 10 },
   commentButton: { backgroundColor: '#31c48d', padding: 10, borderRadius: 10, marginTop: 10, alignItems: 'center' },
   commentButtonText: { color: '#fff', fontWeight: 'bold' },
+  commentsContainer: {
+  backgroundColor: '#1a1a1a',
+  height: 200,
+  padding: 10,
+  borderRadius: 10,
+  marginVertical: 10,
+},
+commentRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 5,
+},
+deleteIcon: {
+  color: 'red',
+  marginLeft: 8,
+  fontSize: 16,
+},
 });

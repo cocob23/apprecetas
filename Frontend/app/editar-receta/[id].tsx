@@ -106,6 +106,11 @@ export default function EditarRecetaScreen() {
       <TouchableOpacity onPress={() => router.push(`/editar-pasos/${recetaId}`)}>
         <Text style={{ color: '#31c48d' }}>✏️ Editar pasos</Text>
       </TouchableOpacity>
+      
+      <TouchableOpacity onPress={() => router.push(`/editar-ingredientes/${recetaId}`)}>
+        <Text style={{ color: '#31c48d', marginTop: 10 }}>✏️ Editar ingredientes</Text>
+      </TouchableOpacity>
+
 
 
       <TouchableOpacity style={styles.button} onPress={guardarCambios}>

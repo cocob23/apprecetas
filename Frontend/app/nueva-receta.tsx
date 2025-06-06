@@ -3,16 +3,16 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useContext, useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import { AuthContext } from './AuthContext';
@@ -25,6 +25,7 @@ export default function NuevaRecetaScreen() {
   const [tipo, setTipo] = useState('Principal');
   const [imagenBase64, setImagenBase64] = useState(null);
   const [imagenSeleccionada, setImagenSeleccionada] = useState(false);
+  const [recetaId, setRecetaId] = useState(null);
   const router = useRouter();
 
   const seleccionarImagen = async () => {
@@ -58,7 +59,7 @@ export default function NuevaRecetaScreen() {
           },
           {
             headers: {
-              Authorization: 'Client-ID a8d51cbeb3fa1b9'
+              Authorization: 'Client-ID 5b70aab1b41270b'
             }
           }
         );
@@ -79,14 +80,11 @@ export default function NuevaRecetaScreen() {
         }
       );
 
-      const nuevaId = res.data?.id;
+      const nuevaId = res.data.id;
+      setRecetaId(nuevaId);
 
       Alert.alert("Receta creada exitosamente");
-      router.replace('/(tabs)/recetas');
-
-      if (nuevaId) {
-        router.push(`/editar-pasos/${nuevaId}`);
-      }
+      router.replace(`/editar-pasos/${nuevaId}`);
     } catch (error) {
       console.error("Error al crear receta:", error);
       Alert.alert("Error al crear receta");
@@ -101,17 +99,11 @@ export default function NuevaRecetaScreen() {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <Text style={styles.text}>Nueva Receta</Text>
+          <TextInput style={styles.input} placeholder="Nombre" placeholderTextColor="#888" value={nombre} onChangeText={setNombre} />
+          <TextInput style={styles.input} placeholder="Descripción" placeholderTextColor="#888" value={descripcion} onChangeText={setDescripcion} />
+          <TextInput style={styles.input} placeholder="Porciones" placeholderTextColor="#888" keyboardType="numeric" value={porciones} onChangeText={setPorciones} />
 
-          <Text style={styles.subTitle}>Nombre</Text>
-          <TextInput style={styles.input} value={nombre} onChangeText={setNombre} />
-
-          <Text style={styles.subTitle}>Descripción</Text>
-          <TextInput style={styles.input} value={descripcion} onChangeText={setDescripcion} multiline />
-
-          <Text style={styles.subTitle}>Porciones</Text>
-          <TextInput style={styles.input} keyboardType="numeric" value={porciones} onChangeText={setPorciones} />
-
-          <Text style={styles.subTitle}>Tipo</Text>
+          <Text style={styles.label}>Tipo</Text>
           <View style={styles.input}>
             <RNPickerSelect
               placeholder={{ label: 'Seleccioná un tipo', value: null }}
@@ -154,6 +146,17 @@ export default function NuevaRecetaScreen() {
               {imagenSeleccionada ? '📷 Cambiar imagen' : '📷 Seleccionar imagen'}
             </Text>
           </TouchableOpacity>
+
+          {recetaId && (
+            <>
+            <TouchableOpacity onPress={() => router.push(`/editar-pasos/${recetaId}`)}>
+              <Text style={{ color: '#31c48d', marginTop: 10 }}>✏️ Editar pasos</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push(`/editar-ingredientes/${recetaId}`)}>
+                <Text style={{ color: '#31c48d', marginTop: 10 }}>🧂 Editar ingredientes</Text>
+            </TouchableOpacity>
+            </>
+          )}
 
           <TouchableOpacity style={styles.agregarBtn} onPress={crearReceta}>
             <Text style={styles.agregarTxt}>✅ Crear receta</Text>
@@ -210,10 +213,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  subTitle: {
+  label: {
     color: '#fff',
-    fontSize: 18,
     marginBottom: 5,
-    textAlign: 'left'
+    fontSize: 16,
+    fontWeight: 'bold'
   },
 });

@@ -35,8 +35,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="categorias"
         options={{
-          title: 'Categorías',
-          tabBarIcon: ({ color, size }) => <Ionicons name="grid" size={size} color={color} />,
+          title: 'Usuarios',
+          tabBarIcon: ({ color, size }) => <Ionicons name="people-outline" size={size} color={color} />,
         }}
       />
 

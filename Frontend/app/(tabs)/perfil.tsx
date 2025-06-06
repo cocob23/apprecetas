@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   logoIcon: { width: 100, height: 100, marginBottom: 10 },
   logoText: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
   content: { flex: 1, justifyContent: 'flex-start', alignItems: 'center', marginTop: 20 },
-  title: { fontSize: 32, color: '#fff', fontWeight: 'bold', marginBottom: 10 },
+  title: { fontSize: 32, color: '#fff', fontWeight: 'bold', marginBottom: 30, marginTop: 50, textAlign: 'center' },
   subtitle: { color: '#ccc', marginBottom: 10 },
   bold: { fontWeight: 'bold', color: '#fff' },
   label: { fontSize: 20, fontWeight: 'bold', color: '#aaa', marginTop: 10, marginBottom: 10 },

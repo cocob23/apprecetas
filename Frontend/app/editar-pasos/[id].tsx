@@ -2,13 +2,13 @@ import axios from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function EditarPasosScreen() {
@@ -169,6 +169,12 @@ const agregarPaso = () => {
       </TouchableOpacity>
       <TouchableOpacity style={styles.finalizarBtn} onPress={() => router.back()}>
         <Text style={styles.finalizarTxt}>Volver</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.finalizarBtn}
+        onPress={() => router.push(`/editar-ingredientes/${recetaId}`)}
+      >
+        <Text style={styles.finalizarTxt}>Continuar con ingredientes</Text>
       </TouchableOpacity>
     </View>
   );

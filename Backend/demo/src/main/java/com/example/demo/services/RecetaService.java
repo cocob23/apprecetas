@@ -2,7 +2,9 @@ package com.example.demo.services;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
@@ -164,6 +166,26 @@ public class RecetaService {
         return recetaRepository.findByUsuario(usuario);
     }
 
+    public List<Receta> buscarPorIngredientes(List<Long> ids, boolean incluir) {
+        List<RecetaIngrediente> relaciones = recetaIngredienteRepository.findAll();
 
+
+        return relaciones.stream()
+            .collect(Collectors.groupingBy(ri -> ri.getReceta()))
+            .entrySet().stream()
+            .filter(entry -> {
+                List<Long> idsEnReceta = entry.getValue().stream()
+                    .map(ri -> ri.getIngrediente().getId())
+                    .collect(Collectors.toList());
+
+                if (incluir) {
+                    return idsEnReceta.containsAll(ids);
+                } else {
+                    return idsEnReceta.stream().noneMatch(ids::contains);
+                }
+            })
+            .map(Map.Entry::getKey)
+            .collect(Collectors.toList());
+    }
 
 }

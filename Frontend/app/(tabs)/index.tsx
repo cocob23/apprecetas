@@ -7,17 +7,77 @@ export default function InicioScreen() {
   const [recetasDestacadas, setRecetasDestacadas] = useState([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [busqueda, setBusqueda] = useState('');
+  const [recetasOrdenadas, setRecetasOrdenadas] = useState([]);
+  const [recetasFiltradas, setRecetasFiltradas] = useState([]);
 
-  useEffect(() => {
-    axios.get('http://192.168.0.232:8081/recetas/recientes')
-      .then((response) => setRecetasDestacadas(response.data))
-      .catch((error) => console.error('Error al traer recetas:', error))
-      .finally(() => setLoading(false));
-  }, []);
+
+
+useEffect(() => {
+  const cargarRecetas = async () => {
+    try {
+      const recientes = await axios.get('http://192.168.0.232:8081/recetas/recientes');
+      const ordenadas = await axios.get('http://192.168.0.232:8081/recetas/ordenadas', {
+        params: { criterio: 'alfabetico' }
+      });
+
+      setRecetasDestacadas(recientes.data);
+      setRecetasOrdenadas(ordenadas.data);
+    } catch (error) {
+      console.error('Error al cargar recetas:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  cargarRecetas();
+}, []);
 
   const handleRecetaPress = (id) => {
     router.push(`../detalle-receta/${id}`);
   };
+
+  const buscarRecetas = async () => {
+  if (!busqueda.trim()) return;
+
+  setLoading(true);
+  try {
+    const res = await axios.get(`http://192.168.0.232:8081/recetas/buscar`, {
+      params: { nombre: busqueda.trim() }
+    });
+    setRecetasDestacadas(res.data); // usás el mismo arreglo para mostrar resultados
+  } catch (error) {
+    console.error('Error al buscar recetas:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const filtrarPorTipo = async (tipo) => {
+  setBusqueda('');
+  setLoading(true);
+  try {
+    const res = await axios.get(`http://192.168.0.232:8081/recetas/tipo/${tipo}`);
+    setRecetasFiltradas(res.data);
+  } catch (error) {
+    console.error('Error al filtrar por tipo:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const limpiarBusqueda = async () => {
+  setBusqueda('');
+  setLoading(true);
+  try {
+    const res = await axios.get('http://192.168.0.232:8081/recetas/recientes');
+    setRecetasDestacadas(res.data);
+  } catch (error) {
+    console.error('Error al cargar recetas recientes:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (loading) {
     return (
@@ -30,11 +90,27 @@ export default function InicioScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Image source={require('../../assets/icons/logochef.png')} style={styles.logo} />
-        <TextInput placeholder="Buscar.." placeholderTextColor="#aaa" style={styles.search} />
-        <Image source={require('../../assets/icons/bell.png')} style={styles.icon} />
-        <Image source={require('../../assets/icons/menu.png')} style={styles.icon} />
-      </View>
+  <Image source={require('../../assets/icons/logochef.png')} style={styles.logo} />
+
+  <View style={styles.searchContainer}>
+    <TextInput
+      placeholder="Buscar.."
+      placeholderTextColor="#aaa"
+      style={styles.search}
+      value={busqueda}
+      onChangeText={setBusqueda}
+      onSubmitEditing={buscarRecetas}
+    />
+    {busqueda !== '' && (
+      <TouchableOpacity onPress={limpiarBusqueda} style={styles.clearButton}>
+        <Text style={{ color: '#fff', fontSize: 16 }}>✖</Text>
+      </TouchableOpacity>
+    )}
+  </View>
+
+  <Image source={require('../../assets/icons/bell.png')} style={styles.icon} />
+  <Image source={require('../../assets/icons/menu.png')} style={styles.icon} />
+</View>
 
       <Text style={styles.title}>Recetas recientes</Text>
       <ScrollView horizontal style={styles.carousel} showsHorizontalScrollIndicator={false}>
@@ -45,15 +121,37 @@ export default function InicioScreen() {
           </TouchableOpacity>
         ))}
       </ScrollView>
+      <Text style={styles.title}>Recetas ordenadas A-Z</Text>
+<ScrollView horizontal style={styles.carousel} showsHorizontalScrollIndicator={false}>
+  {recetasOrdenadas.map((receta) => (
+    <TouchableOpacity key={receta.id} style={styles.recipeCardContainer} onPress={() => handleRecetaPress(receta.id)}>
+      <Image source={{ uri: receta.imagenUrl }} style={styles.recipeCard} />
+      <Text style={styles.recipeName}>{receta.nombre}</Text>
+    </TouchableOpacity>
+  ))}
+</ScrollView>
 
       <Text style={styles.title}>Explorar</Text>
-      <View style={styles.tagsContainer}>
-        {[
-          'Principal', 'Merienda', 'Postre', 'Desayuno', 'Entradas'
-        ].map((tag) => (
-          <Text style={styles.tag} key={tag}>{tag}</Text>
-        ))}
-      </View>
+      {recetasFiltradas.length > 0 && (
+  <>
+    <Text style={styles.title}>Recetas tipo: {recetasFiltradas[0]?.tipo}</Text>
+    <ScrollView horizontal style={styles.carousel} showsHorizontalScrollIndicator={false}>
+      {recetasFiltradas.map((receta) => (
+        <TouchableOpacity key={receta.id} style={styles.recipeCardContainer} onPress={() => handleRecetaPress(receta.id)}>
+          <Image source={{ uri: receta.imagenUrl }} style={styles.recipeCard} />
+          <Text style={styles.recipeName}>{receta.nombre}</Text>
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
+  </>
+)}
+<View style={styles.tagsContainer}>
+  {['Principal', 'Merienda', 'Postre', 'Desayuno', 'Entradas'].map((tag) => (
+    <TouchableOpacity key={tag} onPress={() => filtrarPorTipo(tag)}>
+      <Text style={styles.tag}>{tag}</Text>
+    </TouchableOpacity>
+  ))}
+</View>
     </ScrollView>
   );
 }
@@ -93,7 +191,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
-    marginVertical: 15,
+    marginVertical: 12,
   },
   carousel: {
     flexDirection: 'row',
@@ -127,4 +225,17 @@ const styles = StyleSheet.create({
     margin: 4,
     fontSize: 14,
   },
+  searchContainer: {
+  flex: 1,
+  position: 'relative',
+  marginRight: 10,
+},
+clearButton: {
+  position: 'absolute',
+  right: 10,
+  top: 8,
+  padding: 4,
+  zIndex: 1,
+},
+
 });

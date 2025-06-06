@@ -2,7 +2,10 @@ package com.example.demo.controllers;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +30,8 @@ import com.example.demo.models.LikeReceta;
 import com.example.demo.models.Receta;
 import com.example.demo.models.RecetaIngrediente;
 import com.example.demo.models.Usuario;
+import com.example.demo.repositories.RecetaIngredienteRepository;
+import com.example.demo.repositories.RecetaRepository;
 
 @RestController
 @RequestMapping("/recetas")
@@ -35,6 +40,10 @@ public class RecetaController {
 	RecetaService recetaService;
 	@Autowired
 	UsuarioService usuarioService;
+	@Autowired 
+	RecetaIngredienteRepository recetaIngredienteRepository;
+	@Autowired
+	RecetaRepository recetaRepository;
 	
 	@PostMapping("/subir")
 	public ResponseEntity<?> subirReceta(@RequestParam Long usuarioId, @RequestBody Receta receta) {
@@ -181,9 +190,34 @@ public class RecetaController {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
 	    }
 	}
+	@GetMapping("/{id}/ingredientes")
+	public List<Map<String, String>> obtenerIngredientesDeReceta(@PathVariable Long id) {
+	    List<RecetaIngrediente> lista = recetaIngredienteRepository.findByRecetaId(id);
+	    return lista.stream().map(ri -> {
+	        Map<String, String> map = new HashMap<>();
+	        map.put("nombre", ri.getIngrediente().getNombre());
+	        map.put("cantidad", ri.getCantidad());
+	        return map;
+	    }).collect(Collectors.toList());
+	}
+	
+	@GetMapping("/ordenadas")
+	public List<Receta> listarOrdenadas(@RequestParam String criterio) {
+	    if (criterio.equalsIgnoreCase("alfabetico")) {
+	        return recetaRepository.findAllByOrderByNombreAsc();
+	    }
+	    return recetaRepository.findAll();
+	}
 
+	@GetMapping("/no-contienen")
+	public ResponseEntity<List<Receta>> buscarPorIngredientesExcluidos(@RequestParam List<Long> ids) {
+	    List<Receta> recetas = recetaService.buscarPorIngredientes(ids, false);
+	    return ResponseEntity.ok(recetas);
+	}
 
-
-
-
+	@GetMapping("/contienen")
+	public ResponseEntity<List<Receta>> buscarPorIngredientesIncluidos(@RequestParam List<Long> ids) {
+	    List<Receta> recetas = recetaService.buscarPorIngredientes(ids, true);
+	    return ResponseEntity.ok(recetas);
+	}
 }
