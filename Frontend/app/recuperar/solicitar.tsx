@@ -2,19 +2,31 @@ import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 export default function SolicitarRecuperoScreen() {
   const [mail, setMail] = useState('');
+
+  const mostrarToast = (mensaje, tipo = 'success') => {
+    Toast.show({
+      type: tipo,
+      text1: mensaje,
+      visibilityTime: 2000,
+      position: 'top',
+      topOffset: 70,
+    });
+  };
 
   const handleEnviarCodigo = async () => {
     try {
       await axios.post('http://192.168.0.232:8081/usuarios/recuperar', null, {
         params: { mail },
       });
+      mostrarToast('Código enviado al mail');
       router.push({ pathname: '/recuperar/verificar', params: { mail } });
     } catch (error) {
-      Alert.alert('Error', 'No se pudo enviar el código');
+      mostrarToast('No se pudo enviar el código', 'error');
     }
   };
 
@@ -29,7 +41,9 @@ export default function SolicitarRecuperoScreen() {
 
       <View style={styles.content}>
         <Text style={styles.title}>Recuperar contraseña</Text>
-        <Text style={styles.subtitle}>Te enviaremos un código al mail para restablecer tu contraseña.</Text>
+        <Text style={styles.subtitle}>
+          Te enviaremos un código al mail para restablecer tu contraseña.
+        </Text>
 
         <Text style={styles.label}>Email</Text>
         <TextInput
@@ -46,6 +60,8 @@ export default function SolicitarRecuperoScreen() {
           </LinearGradient>
         </TouchableOpacity>
       </View>
+
+      <Toast />
     </View>
   );
 }

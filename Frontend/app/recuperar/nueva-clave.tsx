@@ -2,16 +2,27 @@ import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 export default function NuevaClaveScreen() {
   const { mail } = useLocalSearchParams();
   const [clave1, setClave1] = useState('');
   const [clave2, setClave2] = useState('');
 
+  const mostrarToast = (mensaje, tipo = 'success') => {
+    Toast.show({
+      type: tipo,
+      text1: mensaje,
+      visibilityTime: 2000,
+      position: 'top',
+      topOffset: 70,
+    });
+  };
+
   const handleCambiarClave = async () => {
     if (clave1 !== clave2) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
+      mostrarToast('Las contraseñas no coinciden', 'error');
       return;
     }
 
@@ -19,10 +30,10 @@ export default function NuevaClaveScreen() {
       await axios.post('http://192.168.0.232:8081/usuarios/cambiar-clave', null, {
         params: { mail, nuevaClave: clave1 },
       });
-      Alert.alert('Listo', 'Tu contraseña fue actualizada');
+      mostrarToast('Tu contraseña fue actualizada');
       router.push('/perfil');
     } catch (error) {
-      Alert.alert('Error', 'No se pudo cambiar la contraseña');
+      mostrarToast('No se pudo cambiar la contraseña', 'error');
     }
   };
 
@@ -64,6 +75,8 @@ export default function NuevaClaveScreen() {
           </LinearGradient>
         </TouchableOpacity>
       </View>
+
+      <Toast />
     </View>
   );
 }

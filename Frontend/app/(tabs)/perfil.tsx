@@ -4,7 +4,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useContext, useState } from 'react';
 import {
-  Alert,
   Image,
   Platform,
   SafeAreaView,
@@ -14,6 +13,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { loginUsuario } from '../../services/api';
 import { AuthContext } from '../AuthContext';
 
@@ -22,13 +22,23 @@ export default function PerfilScreen() {
   const [mail, setMail] = useState('');
   const [clave, setClave] = useState('');
 
+  const mostrarToast = (mensaje) => {
+    Toast.show({
+      type: 'success',
+      text1: mensaje,
+      visibilityTime: 2000,
+      position: 'top',
+      topOffset: 70,
+    });
+  };
+
   const handleLogin = async () => {
     try {
       const data = await loginUsuario(mail, clave);
       await login(data);
-      Alert.alert('Bienvenido', `Hola ${data.alias}`);
+      mostrarToast(`Hola ${data.alias}`);
     } catch (error) {
-      alert(error.message || 'Error al iniciar sesión');
+      mostrarToast(error.message || 'Error al iniciar sesión');
     }
   };
 
@@ -56,10 +66,10 @@ export default function PerfilScreen() {
         const resUser = await axios.get(`http://192.168.0.232:8081/usuarios/${usuario.id}`);
         setUsuario(resUser.data);
 
-        Alert.alert("¡Foto actualizada!");
+        mostrarToast("¡Foto actualizada!");
       } catch (err) {
         console.error(err);
-        Alert.alert("Error", "No se pudo subir la foto");
+        mostrarToast("Error al subir la foto");
       }
     }
   };
@@ -113,9 +123,8 @@ export default function PerfilScreen() {
               <Text style={styles.buttonText}>Inicia sesión</Text>
             </LinearGradient>
           </TouchableOpacity>
-
-
         </View>
+        <Toast />
       </SafeAreaView>
     );
   }
@@ -142,8 +151,6 @@ export default function PerfilScreen() {
               <Text style={styles.buttonText}>Recuperar clave</Text>
             </LinearGradient>
           </TouchableOpacity>
-
-
         </View>
 
         <View style={styles.bottom}>
@@ -152,6 +159,7 @@ export default function PerfilScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      <Toast />
     </SafeAreaView>
   );
 }
@@ -197,7 +205,7 @@ const styles = StyleSheet.create({
     marginBottom: 20
   },
   text: { color: '#ccc', fontSize: 16 },
-  avatar: { width: 150, height: 150, borderRadius: 50, marginBottom: 20 },
+  avatar: { width: 150, height: 150, borderRadius: 100, marginBottom: 20 },
   logoutButton: {
     backgroundColor: '#e53935',
     padding: 15,

@@ -3,7 +3,6 @@ import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-  Alert,
   FlatList,
   StyleSheet,
   Text,
@@ -11,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import ToastMessage from '../../components/ToastMessage';
 
 export default function EditarPasosScreen() {
   const { id } = useLocalSearchParams();
@@ -18,6 +18,13 @@ export default function EditarPasosScreen() {
   const router = useRouter();
 
   const [pasos, setPasos] = useState([]);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const mostrarToast = (mensaje) => {
+    setToastMessage(mensaje);
+    setToastVisible(true);
+  };
 
   const ordenarPorNumero = (arr) =>
     [...arr].sort((a, b) => Number(a.numero) - Number(b.numero));
@@ -32,7 +39,7 @@ export default function EditarPasosScreen() {
       setPasos(ordenarPorNumero(pasosConLocalId));
     } catch (err) {
       console.error('Error al cargar pasos:', err);
-      Alert.alert("Error", "No se pudieron cargar los pasos");
+      mostrarToast("Error al cargar pasos");
     }
   };
 
@@ -53,25 +60,30 @@ export default function EditarPasosScreen() {
             Authorization: 'Client-ID 5b70aab1b41270b'
           }
         });
+
         const url = res.data.data.link;
         actualizarPaso(localId, 'imagenUrl', url);
-        Alert.alert("¡Imagen subida!");
+
+        const paso = pasos.find(p => p.localId === localId);
+        await guardarCambiosPaso(paso.id, { ...paso, imagenUrl: url });
+
+        mostrarToast("Imagen subida y guardada");
       } catch (err) {
         console.error(err);
-        Alert.alert("Error al subir imagen");
+        mostrarToast("Error al subir imagen");
       }
     }
   };
 
   const guardarCambiosPaso = async (id, paso) => {
     if (!paso.descripcion.trim()) {
-      Alert.alert("Error", "La descripción del paso no puede estar vacía");
+      mostrarToast("La descripción no puede estar vacía");
       return;
     }
 
     const cantidadConMismoNumero = pasos.filter(p => p.numero === paso.numero && p.localId !== paso.localId).length;
     if (cantidadConMismoNumero > 0) {
-      Alert.alert("Error", `Ya existe otro paso con el número ${paso.numero}`);
+      mostrarToast(`Ya existe un paso con número ${paso.numero}`);
       return;
     }
 
@@ -87,11 +99,11 @@ export default function EditarPasosScreen() {
         await axios.put(`http://192.168.0.232:8081/pasos/${id}/editar`, paso);
       }
 
-      Alert.alert("Paso guardado correctamente");
+      mostrarToast("Paso guardado correctamente");
       cargarPasos();
     } catch (err) {
       console.error('Error al guardar paso:', err);
-      Alert.alert("Error al guardar el paso");
+      mostrarToast("Error al guardar paso");
     }
   };
 
@@ -102,11 +114,11 @@ export default function EditarPasosScreen() {
         return;
       }
       await axios.delete(`http://192.168.0.232:8081/pasos/${id}/eliminar`);
-      Alert.alert("Paso eliminado");
+      mostrarToast("Paso eliminado");
       cargarPasos();
     } catch (err) {
       console.error('Error al eliminar paso:', err);
-      Alert.alert("Error al eliminar el paso");
+      mostrarToast("Error al eliminar paso");
     }
   };
 
@@ -178,6 +190,13 @@ export default function EditarPasosScreen() {
       ) : (
         <Text style={styles.noPasos}>No hay pasos para esta receta</Text>
       )}
+      <ToastMessage
+        visible={toastVisible}
+        message={toastMessage}
+        onHide={() => setToastVisible(false)}
+        style={styles.toast}
+      />
+
       <TouchableOpacity style={styles.agregarBtn} onPress={agregarPaso}>
         <Text style={styles.agregarTxt}>+ Agregar paso</Text>
       </TouchableOpacity>
@@ -190,6 +209,7 @@ export default function EditarPasosScreen() {
       >
         <Text style={styles.finalizarTxt}>Continuar con ingredientes</Text>
       </TouchableOpacity>
+      
     </View>
   );
 }
@@ -229,4 +249,5 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   }
+
 });

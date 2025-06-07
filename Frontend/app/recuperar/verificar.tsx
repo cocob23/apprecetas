@@ -2,22 +2,33 @@ import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 export default function VerificarCodigoScreen() {
   const [codigo, setCodigo] = useState('');
   const router = useRouter();
   const { mail } = useLocalSearchParams();
 
+  const mostrarToast = (mensaje, tipo = 'success') => {
+    Toast.show({
+      type: tipo,
+      text1: mensaje,
+      visibilityTime: 2000,
+      position: 'top',
+      topOffset: 70,
+    });
+  };
+
   const handleVerificar = async () => {
     try {
       await axios.post('http://192.168.0.232:8081/usuarios/verificar', null, {
         params: { mail, codigo }
       });
-      Alert.alert('Código válido', 'Ahora ingresá tu nueva clave');
+      mostrarToast('Código válido');
       router.push({ pathname: '/recuperar/nueva-clave', params: { mail } });
     } catch (err) {
-      Alert.alert('Error', 'El código es incorrecto o expiró');
+      mostrarToast('Código incorrecto o expirado', 'error');
     }
   };
 
@@ -50,6 +61,8 @@ export default function VerificarCodigoScreen() {
           </LinearGradient>
         </TouchableOpacity>
       </View>
+
+      <Toast />
     </View>
   );
 }

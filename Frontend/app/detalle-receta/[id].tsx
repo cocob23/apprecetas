@@ -4,8 +4,8 @@ import { useLocalSearchParams } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Image,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,6 +14,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { AuthContext } from '../AuthContext';
 
 export default function DetalleRecetaScreen() {
@@ -31,15 +32,28 @@ export default function DetalleRecetaScreen() {
   const [miPuntuacion, setMiPuntuacion] = useState(0);
   const [pasos, setPasos] = useState([]);
   const [ingredientes, setIngredientes] = useState([]);
+  const [refrescando, setRefrescando] = useState(false);
+
+  const mostrarToast = (mensaje) => {
+    Toast.show({
+      type: 'success',
+      text1: mensaje,
+      visibilityTime: 2000,
+      position: 'top',
+      topOffset: 70,
+    });
+  };
 
   const cargarDatos = async () => {
     try {
-      const recetaRes = await axios.get(`http://192.168.0.232:8081/recetas/${recetaId}`);
-      const likesRes = await axios.get(`http://192.168.0.232:8081/recetas/${recetaId}/likes`);
-      const comentariosRes = await axios.get(`http://192.168.0.232:8081/comentarios/aprobados?recetaId=${recetaId}`);
-      const puntuacionRes = await axios.get(`http://192.168.0.232:8081/puntuaciones/promedio?recetaId=${recetaId}`);
-      const pasosRes = await axios.get(`http://192.168.0.232:8081/pasos/por-receta?recetaId=${recetaId}`);
-      const ingredientesRes = await axios.get(`http://192.168.0.232:8081/recetas/${recetaId}/ingredientes`);
+      const [recetaRes, likesRes, comentariosRes, puntuacionRes, pasosRes, ingredientesRes] = await Promise.all([
+        axios.get(`http://192.168.0.232:8081/recetas/${recetaId}`),
+        axios.get(`http://192.168.0.232:8081/recetas/${recetaId}/likes`),
+        axios.get(`http://192.168.0.232:8081/comentarios/aprobados?recetaId=${recetaId}`),
+        axios.get(`http://192.168.0.232:8081/puntuaciones/promedio?recetaId=${recetaId}`),
+        axios.get(`http://192.168.0.232:8081/pasos/por-receta?recetaId=${recetaId}`),
+        axios.get(`http://192.168.0.232:8081/recetas/${recetaId}/ingredientes`)
+      ]);
 
       let miPuntaje = 0;
       let likeExiste = false;
@@ -49,17 +63,13 @@ export default function DetalleRecetaScreen() {
           const yaPuntuoRes = await axios.get(`http://192.168.0.232:8081/puntuaciones/usuario`, {
             params: { usuarioId: usuario.id, recetaId }
           });
-          if (yaPuntuoRes.data !== null) {
-            miPuntaje = yaPuntuoRes.data;
-          }
-        } catch (err) {
-          miPuntaje = 0;
-        }
+          if (yaPuntuoRes.data !== null) miPuntaje = yaPuntuoRes.data;
 
-        const likeRes = await axios.get(`http://192.168.0.232:8081/recetas/${recetaId}/liked`, {
-          params: { usuarioId: usuario.id }
-        });
-        likeExiste = likeRes.data;
+          const likeRes = await axios.get(`http://192.168.0.232:8081/recetas/${recetaId}/liked`, {
+            params: { usuarioId: usuario.id }
+          });
+          likeExiste = likeRes.data;
+        } catch {}
       }
 
       setReceta(recetaRes.data);
@@ -72,10 +82,16 @@ export default function DetalleRecetaScreen() {
       setIngredientes(ingredientesRes.data);
     } catch (error) {
       console.error('Error al cargar los datos:', error);
-      Alert.alert("Error", "No se pudieron cargar los datos");
+      mostrarToast("Error al cargar los datos");
     } finally {
       setLoading(false);
     }
+  };
+
+  const onRefresh = async () => {
+    setRefrescando(true);
+    await cargarDatos();
+    setRefrescando(false);
   };
 
   useEffect(() => {
@@ -83,7 +99,7 @@ export default function DetalleRecetaScreen() {
   }, [id]);
 
   const manejarLike = async () => {
-    if (!usuario) return Alert.alert("Iniciá sesión para dar like");
+    if (!usuario) return mostrarToast("Iniciá sesión para dar like");
     try {
       if (meGusta) {
         await axios.delete(`http://192.168.0.232:8081/recetas/${recetaId}/dislike`, {
@@ -101,7 +117,7 @@ export default function DetalleRecetaScreen() {
   };
 
   const manejarPuntuacion = async (valor) => {
-    if (!usuario) return Alert.alert("Iniciá sesión para puntuar");
+    if (!usuario) return mostrarToast("Iniciá sesión para puntuar");
     try {
       await axios.post(`http://192.168.0.232:8081/puntuaciones/guardar`, null, {
         params: {
@@ -117,7 +133,7 @@ export default function DetalleRecetaScreen() {
   };
 
   const manejarComentario = async () => {
-    if (!usuario) return Alert.alert("Iniciá sesión para comentar");
+    if (!usuario) return mostrarToast("Iniciá sesión para comentar");
     if (!nuevoComentario.trim()) return;
 
     try {
@@ -128,123 +144,114 @@ export default function DetalleRecetaScreen() {
       });
       setNuevoComentario('');
       await cargarDatos();
+      mostrarToast("Comentario enviado");
     } catch (error) {
       console.error('Error al comentar:', error);
     }
   };
 
   const eliminarComentario = async (comentarioId) => {
-    Alert.alert(
-      'Eliminar comentario',
-      '¿Estás seguro que querés eliminar este comentario?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await axios.delete(`http://192.168.0.232:8081/comentarios/${comentarioId}/eliminar`);
-              cargarDatos();
-            } catch (error) {
-              console.error('Error al eliminar comentario:', error);
-            }
-          }
-        }
-      ]
-    );
+    try {
+      await axios.delete(`http://192.168.0.232:8081/comentarios/${comentarioId}/eliminar`);
+      mostrarToast("Comentario eliminado");
+      await cargarDatos();
+    } catch (error) {
+      console.error('Error al eliminar comentario:', error);
+    }
   };
 
   if (loading || !receta) {
-    return (
-      <View style={styles.centered}><ActivityIndicator size="large" color="#31c48d" /></View>
-    );
+    return <View style={styles.centered}><ActivityIndicator size="large" color="#31c48d" /></View>;
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
-      <Image source={{ uri: receta.imagenUrl }} style={styles.image} />
-      <Text style={styles.title}>{receta.nombre}</Text>
-      <Text style={styles.subtitle}>Por: {receta.usuario?.alias || 'Desconocido'}</Text>
-      <Text style={styles.text}>{receta.descripcion}</Text>
-      <Text style={styles.text}>Tipo: {receta.tipo} | Porciones: {receta.porciones}</Text>
-      <Text style={styles.text}>⭐ Promedio: {promedioPuntuacion.toFixed(1)} / 5</Text>
-
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
-        <TouchableWithoutFeedback onPress={manejarLike}>
-          <FontAwesome
-            name="heart"
-            size={24}
-            color={meGusta ? 'red' : 'gray'}
-            style={{ marginRight: 10 }}
+    <>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refrescando}
+            onRefresh={onRefresh}
+            colors={['#31c48d']}
+            tintColor="#31c48d"
           />
-        </TouchableWithoutFeedback>
-        <Text style={{ color: '#fff' }}>{likes}</Text>
+        }
+      >
+        <Text style={styles.title}>{receta.nombre}</Text>
+        <Image source={{ uri: receta.imagenUrl }} style={styles.image} />
+        <Text style={styles.subtitle}>Por: {receta.usuario?.alias || 'Desconocido'}</Text>
+        <Text style={styles.text}>{receta.descripcion}</Text>
+        <Text style={styles.text}>Tipo: {receta.tipo} | Porciones: {receta.porciones}</Text>
+        <Text style={styles.text}>⭐ Promedio: {promedioPuntuacion.toFixed(1)} / 5</Text>
 
-        <View style={{ flexDirection: 'row', marginLeft: 20 }}>
-          {[1, 2, 3, 4, 5].map((star) => (
-            <TouchableOpacity key={star} onPress={() => manejarPuntuacion(star)}>
-              <FontAwesome
-                name={star <= miPuntuacion ? 'star' : 'star-o'}
-                size={24}
-                color="#ffd700"
-                style={{ marginHorizontal: 2 }}
-              />
-            </TouchableOpacity>
-          ))}
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
+          <TouchableWithoutFeedback onPress={manejarLike}>
+            <FontAwesome name="heart" size={24} color={meGusta ? 'red' : 'gray'} style={{ marginRight: 10 }} />
+          </TouchableWithoutFeedback>
+          <Text style={{ color: '#fff' }}>{likes}</Text>
+
+          <View style={{ flexDirection: 'row', marginLeft: 20 }}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <TouchableOpacity key={star} onPress={() => manejarPuntuacion(star)}>
+                <FontAwesome name={star <= miPuntuacion ? 'star' : 'star-o'} size={24} color="#ffd700" style={{ marginHorizontal: 2 }} />
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-      </View>
 
-      <Text style={styles.sectionTitle}>Ingredientes</Text>
-      {ingredientes.map((ing, index) => (
-        <Text key={index} style={{ color: '#eee', marginBottom: 4 }}>
-          • {ing.nombre} ({ing.cantidad})
-        </Text>
-      ))}
+        <Text style={styles.sectionTitle}>Ingredientes</Text>
+        {ingredientes.map((ing, index) => (
+          <Text key={index} style={{ color: '#eee', marginBottom: 4 }}>
+            • {ing.nombre} ({ing.cantidad})
+          </Text>
+        ))}
 
-      <Text style={styles.sectionTitle}>Pasos</Text>
-      {pasos.map((paso, index) => (
-        <View key={index} style={{ marginBottom: 10 }}>
-          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Paso {paso.numero}:</Text>
-          <Text style={{ color: '#eee' }}>{paso.descripcion}</Text>
-          {paso.imagenUrl && (
-            <Image source={{ uri: paso.imagenUrl }} style={{ height: 150, borderRadius: 8, marginTop: 5 }} />
-          )}
-          {paso.videoUrl && (
-            <Text style={{ color: '#4cc9f0', marginTop: 5 }}>🎥 Video: {paso.videoUrl}</Text>
-          )}
+        <Text style={styles.sectionTitle}>Pasos</Text>
+        {pasos.map((paso, index) => (
+          <View key={index} style={{ marginBottom: 10 }}>
+            <Text style={{ color: '#fff', fontWeight: 'bold' }}>Paso {paso.numero}:</Text>
+            <Text style={{ color: '#eee' }}>{paso.descripcion}</Text>
+            {paso.imagenUrl && (
+              <Image source={{ uri: paso.imagenUrl + `?t=${Date.now()}` }} style={{ height: 150, borderRadius: 8, marginTop: 5 }} />
+            )}
+            {paso.videoUrl && (
+              <Text style={{ color: '#4cc9f0', marginTop: 5 }}>🎥 Video: {paso.videoUrl}</Text>
+            )}
+          </View>
+        ))}
+
+        <Text style={styles.sectionTitle}>Comentarios</Text>
+        <View style={styles.commentsContainer}>
+          <ScrollView nestedScrollEnabled>
+            {comentarios.map((com, index) => (
+              <View key={index} style={styles.commentRow}>
+                <Text style={styles.comment}>
+                  • <Text style={styles.alias}>{com.aliasUsuario}:</Text> {com.comentario}
+                </Text>
+                {usuario && com.usuarioId === usuario.id && (
+                  <TouchableOpacity onPress={() => eliminarComentario(com.id)}>
+                    <Text style={styles.deleteIcon}>🗑️</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            ))}
+          </ScrollView>
         </View>
-      ))}
 
-      <Text style={styles.sectionTitle}>Comentarios</Text>
-      <View style={styles.commentsContainer}>
-        <ScrollView nestedScrollEnabled>
-          {comentarios.map((com, index) => (
-            <View key={index} style={styles.commentRow}>
-              <Text style={styles.comment}>
-                • <Text style={styles.alias}>{com.aliasUsuario}:</Text> {com.comentario}
-              </Text>
-              {usuario && com.usuarioId === usuario.id && (
-                <TouchableOpacity onPress={() => eliminarComentario(com.id)}>
-                  <Text style={styles.deleteIcon}>🗑️</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          ))}
-        </ScrollView>
-      </View>
-
-      <TextInput
-        style={styles.commentInput}
-        placeholder="Agregá un comentario"
-        placeholderTextColor="#aaa"
-        value={nuevoComentario}
-        onChangeText={setNuevoComentario}
-      />
-      <TouchableOpacity style={styles.commentButton} onPress={manejarComentario}>
-        <Text style={styles.commentButtonText}>Comentar</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <TextInput
+          style={styles.commentInput}
+          placeholder="Agregá un comentario"
+          placeholderTextColor="#aaa"
+          value={nuevoComentario}
+          onChangeText={setNuevoComentario}
+        />
+        <TouchableOpacity style={styles.commentButton} onPress={manejarComentario}>
+          <Text style={styles.commentButtonText}>Comentar</Text>
+        </TouchableOpacity>
+      </ScrollView>
+      <Toast />
+    </>
   );
 }
 
@@ -252,10 +259,10 @@ const styles = StyleSheet.create({
   container: { backgroundColor: '#111', flex: 1, padding: 20 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   image: { width: '100%', height: 200, borderRadius: 10 },
-  title: { color: '#fff', fontSize: 24, fontWeight: 'bold', marginTop: 15 },
+  title: { color: '#fff', fontSize: 24, fontWeight: 'bold', marginTop: 40, marginBottom: 15 },
   subtitle: { color: '#ccc', fontSize: 16, marginBottom: 10 },
   text: { color: '#eee', marginVertical: 5 },
-  sectionTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginTop: 20 },
+  sectionTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginTop: 20, marginBottom: 8 },
   comment: { color: '#ccc', marginTop: 5, flex: 1 },
   alias: { fontWeight: 'bold', color: '#fff' },
   commentInput: { backgroundColor: '#222', color: '#fff', padding: 10, borderRadius: 10, marginTop: 10 },

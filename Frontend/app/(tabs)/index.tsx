@@ -66,7 +66,7 @@ export default function InicioScreen() {
 
   const filtrarPorTipo = async (tipo) => {
     setBusqueda('');
-    setLoading(true);
+    setLoading(false);
     try {
       const res = await axios.get(`http://192.168.0.232:8081/recetas/tipo/${tipo}`);
       setRecetasFiltradas(res.data);
