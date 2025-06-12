@@ -1,0 +1,125 @@
+CREATE DATABASE IF NOT EXISTS `recetas_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+USE `recetas_db`;
+
+-- Tabla: usuarios
+CREATE TABLE `usuarios` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `alias` varchar(50) NOT NULL,
+  `mail` varchar(100) NOT NULL,
+  `clave` varchar(255) NOT NULL,
+  `codigo_reset` varchar(255) DEFAULT NULL,
+  `foto_perfil` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `alias` (`alias`),
+  UNIQUE KEY `mail` (`mail`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Tabla: recetas
+CREATE TABLE `recetas` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `usuario_id` int NOT NULL,
+  `nombre` varchar(255) NOT NULL,
+  `descripcion` text,
+  `porciones` int DEFAULT NULL,
+  `fecha_creacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `aprobada` tinyint(1) DEFAULT '0',
+  `tipo` varchar(255) NOT NULL,
+  `imagen_url` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `usuario_id` (`usuario_id`),
+  CONSTRAINT `recetas_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `recetas_chk_1` CHECK ((`porciones` > 0))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Tabla: ingredientes
+CREATE TABLE `ingredientes` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nombre` (`nombre`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Tabla: receta_ingredientes
+CREATE TABLE `receta_ingredientes` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `receta_id` int NOT NULL,
+  `ingrediente_id` int NOT NULL,
+  `cantidad` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `receta_ingredientes_ibfk_1` (`receta_id`),
+  KEY `receta_ingredientes_ibfk_2` (`ingrediente_id`),
+  CONSTRAINT `receta_ingredientes_ibfk_1` FOREIGN KEY (`receta_id`) REFERENCES `recetas` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `receta_ingredientes_ibfk_2` FOREIGN KEY (`ingrediente_id`) REFERENCES `ingredientes` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Tabla: lista_recetas
+CREATE TABLE `lista_recetas` (
+  `usuario_id` int NOT NULL,
+  `receta_id` int NOT NULL,
+  PRIMARY KEY (`usuario_id`,`receta_id`),
+  KEY `receta_id` (`receta_id`),
+  CONSTRAINT `lista_recetas_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `lista_recetas_ibfk_2` FOREIGN KEY (`receta_id`) REFERENCES `recetas` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Tabla: comentarios
+CREATE TABLE `comentarios` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `usuario_id` int NOT NULL,
+  `receta_id` int NOT NULL,
+  `comentario` text,
+  `aprobado` tinyint(1) DEFAULT '0',
+  `fecha` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `receta_id` (`receta_id`),
+  KEY `comentarios_ibfk_1` (`usuario_id`),
+  CONSTRAINT `comentarios_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `comentarios_ibfk_2` FOREIGN KEY (`receta_id`) REFERENCES `recetas` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Tabla: likes_recetas
+CREATE TABLE `likes_recetas` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `receta_id` bigint NOT NULL,
+  `usuario_id` bigint NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Tabla: pasos
+CREATE TABLE `pasos` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `receta_id` int NOT NULL,
+  `numero` int NOT NULL,
+  `descripcion` text NOT NULL,
+  `imagen_url` varchar(255) DEFAULT NULL,
+  `video_url` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `receta_id` (`receta_id`,`numero`),
+  CONSTRAINT `pasos_ibfk_1` FOREIGN KEY (`receta_id`) REFERENCES `recetas` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Tabla: puntuacion_receta
+CREATE TABLE `puntuacion_receta` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `usuario_id` int NOT NULL,
+  `receta_id` int NOT NULL,
+  `puntuacion` int DEFAULT NULL,
+  `fecha` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_usuario_receta` (`usuario_id`,`receta_id`),
+  KEY `fk_receta` (`receta_id`),
+  CONSTRAINT `fk_receta` FOREIGN KEY (`receta_id`) REFERENCES `recetas` (`id`),
+  CONSTRAINT `fk_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Tabla: recuperacion_clave
+CREATE TABLE `recuperacion_clave` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `usuario_id` int NOT NULL,
+  `codigo` varchar(6) NOT NULL,
+  `creado_en` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `usado` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `usuario_id` (`usuario_id`),
+  CONSTRAINT `recuperacion_clave_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
