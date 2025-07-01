@@ -12,7 +12,7 @@ export default function RecetasScreen() {
   const cargarRecetas = async () => {
     try {
       if (!usuario) return;
-      const res = await axios.get("http://192.168.0.232:8081/recetas/mias", {
+      const res = await axios.get("http://192.168.0.6:8081/recetas/mias", {
         params: { usuarioId: usuario.id }
       });
       setRecetas(res.data);
@@ -32,7 +32,7 @@ export default function RecetasScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              await axios.delete(`http://192.168.0.232:8081/recetas/${id}/eliminar`);
+              await axios.delete(`http://192.168.0.6:8081/recetas/${id}/eliminar`);
               cargarRecetas();
             } catch (error) {
               console.error("Error al eliminar la receta:", error);

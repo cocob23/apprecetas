@@ -47,12 +47,12 @@ export default function DetalleRecetaScreen() {
   const cargarDatos = async () => {
     try {
       const [recetaRes, likesRes, comentariosRes, puntuacionRes, pasosRes, ingredientesRes] = await Promise.all([
-        axios.get(`http://192.168.0.232:8081/recetas/${recetaId}`),
-        axios.get(`http://192.168.0.232:8081/recetas/${recetaId}/likes`),
-        axios.get(`http://192.168.0.232:8081/comentarios/aprobados?recetaId=${recetaId}`),
-        axios.get(`http://192.168.0.232:8081/puntuaciones/promedio?recetaId=${recetaId}`),
-        axios.get(`http://192.168.0.232:8081/pasos/por-receta?recetaId=${recetaId}`),
-        axios.get(`http://192.168.0.232:8081/recetas/${recetaId}/ingredientes`)
+        axios.get(`http://192.168.0.6:8081/recetas/${recetaId}`),
+        axios.get(`http://192.168.0.6:8081/recetas/${recetaId}/likes`),
+        axios.get(`http://192.168.0.6:8081/comentarios/aprobados?recetaId=${recetaId}`),
+        axios.get(`http://192.168.0.6:8081/puntuaciones/promedio?recetaId=${recetaId}`),
+        axios.get(`http://192.168.0.6:8081/pasos/por-receta?recetaId=${recetaId}`),
+        axios.get(`http://192.168.0.6:8081/recetas/${recetaId}/ingredientes`)
       ]);
 
       let miPuntaje = 0;
@@ -60,12 +60,12 @@ export default function DetalleRecetaScreen() {
 
       if (usuario) {
         try {
-          const yaPuntuoRes = await axios.get(`http://192.168.0.232:8081/puntuaciones/usuario`, {
+          const yaPuntuoRes = await axios.get(`http://192.168.0.6:8081/puntuaciones/usuario`, {
             params: { usuarioId: usuario.id, recetaId }
           });
           if (yaPuntuoRes.data !== null) miPuntaje = yaPuntuoRes.data;
 
-          const likeRes = await axios.get(`http://192.168.0.232:8081/recetas/${recetaId}/liked`, {
+          const likeRes = await axios.get(`http://192.168.0.6:8081/recetas/${recetaId}/liked`, {
             params: { usuarioId: usuario.id }
           });
           likeExiste = likeRes.data;
@@ -102,11 +102,11 @@ export default function DetalleRecetaScreen() {
     if (!usuario) return mostrarToast("Iniciá sesión para dar like");
     try {
       if (meGusta) {
-        await axios.delete(`http://192.168.0.232:8081/recetas/${recetaId}/dislike`, {
+        await axios.delete(`http://192.168.0.6:8081/recetas/${recetaId}/dislike`, {
           params: { usuarioId: usuario.id }
         });
       } else {
-        await axios.post(`http://192.168.0.232:8081/recetas/${recetaId}/like`, null, {
+        await axios.post(`http://192.168.0.6:8081/recetas/${recetaId}/like`, null, {
           params: { usuarioId: usuario.id }
         });
       }
@@ -119,7 +119,7 @@ export default function DetalleRecetaScreen() {
   const manejarPuntuacion = async (valor) => {
     if (!usuario) return mostrarToast("Iniciá sesión para puntuar");
     try {
-      await axios.post(`http://192.168.0.232:8081/puntuaciones/guardar`, null, {
+      await axios.post(`http://192.168.0.6:8081/puntuaciones/guardar`, null, {
         params: {
           usuarioId: usuario.id,
           recetaId,
@@ -137,7 +137,7 @@ export default function DetalleRecetaScreen() {
     if (!nuevoComentario.trim()) return;
 
     try {
-      await axios.post(`http://192.168.0.232:8081/comentarios/agregar`, {
+      await axios.post(`http://192.168.0.6:8081/comentarios/agregar`, {
         recetaId,
         usuarioId: usuario.id,
         comentario: nuevoComentario
@@ -152,7 +152,7 @@ export default function DetalleRecetaScreen() {
 
   const eliminarComentario = async (comentarioId) => {
     try {
-      await axios.delete(`http://192.168.0.232:8081/comentarios/${comentarioId}/eliminar`);
+      await axios.delete(`http://192.168.0.6:8081/comentarios/${comentarioId}/eliminar`);
       mostrarToast("Comentario eliminado");
       await cargarDatos();
     } catch (error) {

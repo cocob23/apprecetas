@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.example.demo.models.Usuario;
 import com.example.demo.services.UsuarioService;
+import com.example.demo.services.EmailService;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,14 @@ public class UsuarioController {
 
 	@Autowired
 	UsuarioService usuarioService;
-	
+	@Autowired
+	EmailService emailService;
+
+	@GetMapping("/testmail")
+	public String testMail() {
+	    emailService.enviarCodigo("coticonrado03@gmail.com", "123456");
+	    return "Intentado enviar";
+	}
 	@GetMapping("/ping")
 	public String ping() {
 	    return "pong";

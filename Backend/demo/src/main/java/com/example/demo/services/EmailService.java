@@ -13,6 +13,7 @@ public class EmailService {
 
     public void enviarCodigo(String to, String codigo) {
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("MS_11OIid@test-z0vklo67n9pl7qrx.mlsender.net");
         message.setTo(to);
         message.setSubject("Recuperación de contraseña");
         message.setText("Tu código de recuperación es: " + codigo);

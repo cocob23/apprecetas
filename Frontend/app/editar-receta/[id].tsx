@@ -21,7 +21,7 @@ export default function EditarRecetaScreen() {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        const res = await axios.get(`http://192.168.0.232:8081/recetas/${recetaId}`);
+        const res = await axios.get(`http://192.168.0.6:8081/recetas/${recetaId}`);
         const receta = res.data;
         setNombre(receta.nombre);
         setDescripcion(receta.descripcion);
@@ -37,7 +37,7 @@ export default function EditarRecetaScreen() {
 
   const guardarCambios = async () => {
     try {
-      await axios.put(`http://192.168.0.232:8081/recetas/editar/${recetaId}`, {
+      await axios.put(`http://192.168.0.6:8081/recetas/editar/${recetaId}`, {
         nombre,
         descripcion,
         porciones: parseInt(porciones),

@@ -21,7 +21,7 @@ export default function IngredientesScreen() {
 
   useEffect(() => {
     axios
-      .get('http://192.168.0.232:8081/ingredientes')
+      .get('http://192.168.0.6:8081/ingredientes')
       .then(res => setIngredientes(res.data))
       .catch(err => console.error('Error al cargar ingredientes', err));
   }, []);
@@ -37,7 +37,7 @@ export default function IngredientesScreen() {
     setModoFiltro(modo === 'contienen' ? 'con' : 'sin');
     setLoading(true);
     try {
-      const res = await axios.get(`http://192.168.0.232:8081/recetas/${modo}`, {
+      const res = await axios.get(`http://192.168.0.6:8081/recetas/${modo}`, {
         params: { ids: seleccionados.join(',') }
       });
       setRecetas(res.data);
