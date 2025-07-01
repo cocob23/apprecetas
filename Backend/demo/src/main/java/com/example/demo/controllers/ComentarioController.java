@@ -41,19 +41,19 @@ public class ComentarioController {
     }
 
     @PostMapping("/{id}/aprobar")
-    public ResponseEntity<?> aprobar(@PathVariable Long id) {
+    public ResponseEntity<?> aprobar(@PathVariable Integer id) {
         comentarioService.aprobarComentario(id);
         return ResponseEntity.ok("Comentario aprobado");
     }
 
     @DeleteMapping("/{id}/eliminar")
-    public ResponseEntity<?> eliminar(@PathVariable Long id){
+    public ResponseEntity<?> eliminar(@PathVariable Integer id){
     	comentarioService.eliminarComentario(id);
     	return ResponseEntity.ok("Comentario eliminado");
     }
     
     @GetMapping("/aprobados")
-    public ResponseEntity<?> comentariosAprobados(@RequestParam Long recetaId) {
+    public ResponseEntity<?> comentariosAprobados(@RequestParam Integer recetaId) {
         List<ComentarioRespuestaDTO> comentarios = comentarioService.obtenerAprobadosPorReceta(recetaId);
         return ResponseEntity.ok(comentarios);
     }

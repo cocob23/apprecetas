@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.demo.models.Paso;
 
-public interface PasoRepository extends JpaRepository<Paso, Long>{
-	List<Paso> findByRecetaIdOrderByNumeroAsc(Long recetaId);
+public interface PasoRepository extends JpaRepository<Paso, Integer>{
+	List<Paso> findByRecetaIdOrderByNumeroAsc(int recetaId);
 }

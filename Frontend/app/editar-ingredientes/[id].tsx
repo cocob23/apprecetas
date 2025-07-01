@@ -29,7 +29,7 @@ export default function EditarIngredientesScreen() {
   useEffect(() => {
     const cargarIngredientes = async () => {
       try {
-        const res = await axios.get('http://192.168.0.6:8081/ingredientes');
+        const res = await axios.get('https://apprecetas-production.up.railway.app/ingredientes');
         setIngredientesDisponibles(res.data);
       } catch (error) {
         console.error('Error al cargar ingredientes:', error);
@@ -71,7 +71,7 @@ const agregarIngrediente = async () => {
 
     // 2. Si no existe, lo agregás a la base
     if (!encontrado) {
-      const resNuevo = await axios.post('http://192.168.0.6:8081/ingredientes/crear', {
+      const resNuevo = await axios.post('https://apprecetas-production.up.railway.app/ingredientes/crear', {
         nombre: ingredienteNombre.trim()
       });
       encontrado = resNuevo.data;
@@ -80,7 +80,7 @@ const agregarIngrediente = async () => {
     }
 
     // 3. Agregás el ingrediente a la receta
-    await axios.post('http://192.168.0.6:8081/recetas/agregar-ingrediente', {
+    await axios.post('https://apprecetas-production.up.railway.app/recetas/agregar-ingrediente', {
       recetaId,
       ingredienteId: encontrado.id,
       cantidad

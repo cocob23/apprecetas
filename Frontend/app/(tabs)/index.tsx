@@ -24,8 +24,8 @@ export default function InicioScreen() {
 
   const cargarRecetas = async () => {
     try {
-      const recientes = await axios.get('http://192.168.0.6:8081/recetas/recientes');
-      const ordenadas = await axios.get('http://192.168.0.6:8081/recetas/ordenadas', {
+      const recientes = await axios.get('https://apprecetas-production.up.railway.app/recetas/recientes');
+      const ordenadas = await axios.get('https://apprecetas-production.up.railway.app/recetas/ordenadas', {
         params: { criterio: 'alfabetico' }
       });
 
@@ -53,7 +53,7 @@ export default function InicioScreen() {
 
     setLoading(true);
     try {
-      const res = await axios.get(`http://192.168.0.6:8081/recetas/buscar`, {
+      const res = await axios.get(`https://apprecetas-production.up.railway.app/recetas/buscar`, {
         params: { nombre: busqueda.trim() }
       });
       setRecetasDestacadas(res.data);
@@ -68,7 +68,7 @@ export default function InicioScreen() {
     setBusqueda('');
     setLoading(false);
     try {
-      const res = await axios.get(`http://192.168.0.6:8081/recetas/tipo/${tipo}`);
+      const res = await axios.get(`https://apprecetas-production.up.railway.app/recetas/tipo/${tipo}`);
       setRecetasFiltradas(res.data);
     } catch (error) {
       console.error('Error al filtrar por tipo:', error);

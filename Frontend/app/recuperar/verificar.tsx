@@ -22,7 +22,7 @@ export default function VerificarCodigoScreen() {
 
   const handleVerificar = async () => {
     try {
-      await axios.post('http://192.168.0.6:8081/usuarios/verificar', null, {
+      await axios.post('https://apprecetas-production.up.railway.app/usuarios/verificar', null, {
         params: { mail, codigo }
       });
       mostrarToast('Código válido');

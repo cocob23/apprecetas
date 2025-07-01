@@ -7,12 +7,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.demo.models.PuntuacionReceta;
 
-public interface PuntuacionRecetaRepository extends JpaRepository<PuntuacionReceta, Long> {
+public interface PuntuacionRecetaRepository extends JpaRepository<PuntuacionReceta, Integer> {
 
-    Optional<PuntuacionReceta> findByUsuarioIdAndRecetaId(Long usuarioId, Long recetaId);
+    Optional<PuntuacionReceta> findByUsuarioIdAndRecetaId(int usuarioId, int recetaId);
 
-    List<PuntuacionReceta> findByRecetaId(Long recetaId);
+    List<PuntuacionReceta> findByRecetaId(int recetaId);
     
-    void deleteByRecetaId(Long recetaId);
+    void deleteByRecetaId(int recetaId);
 
 }

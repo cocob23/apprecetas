@@ -16,8 +16,8 @@ public class PuntuacionRecetaController {
 
     @PostMapping("/guardar")
     public ResponseEntity<?> guardarPuntuacion(
-        @RequestParam Long usuarioId,
-        @RequestParam Long recetaId,
+        @RequestParam Integer usuarioId,
+        @RequestParam Integer recetaId,
         @RequestParam Integer puntuacion
     ) {
         try {
@@ -29,15 +29,15 @@ public class PuntuacionRecetaController {
     }
 
     @GetMapping("/promedio")
-    public ResponseEntity<Double> obtenerPromedio(@RequestParam Long recetaId) {
+    public ResponseEntity<Double> obtenerPromedio(@RequestParam Integer recetaId) {
         double promedio = puntuacionRecetaService.calcularPromedioPuntuacion(recetaId);
         return ResponseEntity.ok(promedio);
     }
 
     @GetMapping("/usuario")
     public ResponseEntity<Integer> obtenerPuntuacionUsuario(
-        @RequestParam Long usuarioId,
-        @RequestParam Long recetaId
+        @RequestParam Integer usuarioId,
+        @RequestParam Integer recetaId
     ) {
         Integer puntuacion = puntuacionRecetaService.obtenerPuntuacionPorUsuario(recetaId, usuarioId);
         return ResponseEntity.ok(puntuacion);

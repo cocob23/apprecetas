@@ -20,7 +20,7 @@ export default function SolicitarRecuperoScreen() {
 
   const handleEnviarCodigo = async () => {
     try {
-      await axios.post('http://192.168.0.6:8081/usuarios/recuperar', null, {
+      await axios.post('https://apprecetas-production.up.railway.app/usuarios/recuperar', null, {
         params: { mail },
       });
       mostrarToast('Código enviado al mail');

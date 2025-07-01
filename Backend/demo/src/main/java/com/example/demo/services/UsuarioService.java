@@ -59,7 +59,7 @@ public class UsuarioService {
         return usuarioRepository.findByMailAndClave(mail, clave);
     }
 
-    public Optional<Usuario> findById(Long id) {
+    public Optional<Usuario> findById(int id) {
         return usuarioRepository.findById(id);
     }
     

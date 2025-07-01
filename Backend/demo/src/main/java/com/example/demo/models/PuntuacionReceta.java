@@ -10,7 +10,7 @@ public class PuntuacionReceta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @ManyToOne
     private Usuario usuario;
@@ -32,7 +32,7 @@ public class PuntuacionReceta {
 
     // Getters y setters
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 

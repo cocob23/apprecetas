@@ -19,7 +19,7 @@ public class PasoService {
     @Autowired
     private RecetaRepository recetaRepository;
 
-    public List<Paso> obtenerPasosPorReceta(Long recetaId) {
+    public List<Paso> obtenerPasosPorReceta(int recetaId) {
         return pasoRepository.findByRecetaIdOrderByNumeroAsc(recetaId);
     }
     
@@ -37,14 +37,14 @@ public class PasoService {
         return pasoRepository.save(paso);
     }
     
-    public void eliminarPaso(Long id) {
+    public void eliminarPaso(int id) {
         if (!pasoRepository.existsById(id)) {
             throw new RuntimeException("Paso no encontrado");
         }
         pasoRepository.deleteById(id);
     }
 
-    public Paso editarPaso(Long id, Paso pasoActualizado) {
+    public Paso editarPaso(int id, Paso pasoActualizado) {
         Paso pasoExistente = pasoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Paso no encontrado"));
 

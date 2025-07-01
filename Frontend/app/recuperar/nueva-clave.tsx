@@ -27,7 +27,7 @@ export default function NuevaClaveScreen() {
     }
 
     try {
-      await axios.post('http://192.168.0.6:8081/usuarios/cambiar-clave', null, {
+      await axios.post('https://apprecetas-production.up.railway.app/usuarios/cambiar-clave', null, {
         params: { mail, nuevaClave: clave1 },
       });
       mostrarToast('Tu contraseña fue actualizada');

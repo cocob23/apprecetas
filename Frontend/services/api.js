@@ -1,4 +1,4 @@
-const BASE_URL = 'http://192.168.0.232:8081';
+const BASE_URL = 'https://apprecetas-production.up.railway.app';
 
 export async function loginUsuario(mail, clave) {
   try {

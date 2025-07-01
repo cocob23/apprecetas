@@ -34,12 +34,12 @@ public class PasoController {
     }
 
     @GetMapping("/por-receta")
-    public ResponseEntity<?> pasosPorReceta(@RequestParam Long recetaId) {
+    public ResponseEntity<?> pasosPorReceta(@RequestParam Integer recetaId) {
         return ResponseEntity.ok(pasoService.obtenerPasosPorReceta(recetaId));
     }
     
     @DeleteMapping("/{id}/eliminar")
-    public ResponseEntity<?> eliminarPaso(@PathVariable Long id) {
+    public ResponseEntity<?> eliminarPaso(@PathVariable Integer id) {
         try {
             pasoService.eliminarPaso(id);
             return ResponseEntity.ok("Paso eliminado correctamente");
@@ -49,7 +49,7 @@ public class PasoController {
     }
 
     @PutMapping("/{id}/editar")
-    public ResponseEntity<?> editarPaso(@PathVariable Long id, @RequestBody Paso pasoActualizado) {
+    public ResponseEntity<?> editarPaso(@PathVariable Integer id, @RequestBody Paso pasoActualizado) {
         try {
             Paso actualizado = pasoService.editarPaso(id, pasoActualizado);
             return ResponseEntity.ok(actualizado);

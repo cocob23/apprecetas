@@ -8,7 +8,7 @@ import com.example.demo.models.LikeReceta;
 import com.example.demo.models.Receta;
 import com.example.demo.models.Usuario;
 
-public interface LikeRecetaRepository extends JpaRepository<LikeReceta, Long> {
+public interface LikeRecetaRepository extends JpaRepository<LikeReceta, Integer> {
     boolean existsByUsuarioAndReceta(Usuario usuario, Receta receta);
     long countByReceta(Receta receta);
     void deleteByUsuarioAndReceta(Usuario usuario, Receta receta);

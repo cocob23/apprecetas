@@ -23,7 +23,7 @@ public class PuntuacionRecetaService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public void guardarOActualizarPuntuacion(Long usuarioId, Long recetaId, Integer puntuacion) {
+    public void guardarOActualizarPuntuacion(int usuarioId, int recetaId, Integer puntuacion) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         Receta receta = recetaRepository.findById(recetaId)
@@ -45,7 +45,7 @@ public class PuntuacionRecetaService {
         }
     }
 
-    public Double calcularPromedioPuntuacion(Long recetaId) {
+    public Double calcularPromedioPuntuacion(int recetaId) {
         List<PuntuacionReceta> puntuaciones = puntuacionRecetaRepository.findByRecetaId(recetaId);
         if (puntuaciones.isEmpty()) return 0.0;
 
@@ -56,11 +56,11 @@ public class PuntuacionRecetaService {
         return total / puntuaciones.size();
     }
 
-    public boolean yaPuntuo(Long usuarioId, Long recetaId) {
+    public boolean yaPuntuo(int usuarioId, int recetaId) {
         return puntuacionRecetaRepository.findByUsuarioIdAndRecetaId(usuarioId, recetaId).isPresent();
     }
     
-    public Integer obtenerPuntuacionPorUsuario(Long recetaId, Long usuarioId) {
+    public Integer obtenerPuntuacionPorUsuario(int recetaId, int usuarioId) {
         return puntuacionRecetaRepository.findByUsuarioIdAndRecetaId(usuarioId, recetaId)
                 .map(PuntuacionReceta::getPuntuacion)
                 .orElse(null);

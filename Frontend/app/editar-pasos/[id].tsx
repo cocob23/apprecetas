@@ -31,7 +31,7 @@ export default function EditarPasosScreen() {
 
   const cargarPasos = async () => {
     try {
-      const res = await axios.get(`http://192.168.0.6:8081/pasos/por-receta?recetaId=${recetaId}`);
+      const res = await axios.get(`https://apprecetas-production.up.railway.app/pasos/por-receta?recetaId=${recetaId}`);
       const pasosConLocalId = res.data.map(p => ({
         ...p,
         localId: p.id.toString()
@@ -89,14 +89,14 @@ export default function EditarPasosScreen() {
 
     try {
       if (!id) {
-        await axios.post("http://192.168.0.6:8081/pasos/agregar", {
+        await axios.post("https://apprecetas-production.up.railway.app/pasos/agregar", {
           recetaId,
           numero: paso.numero,
           descripcion: paso.descripcion,
           imagenUrl: paso.imagenUrl,
         });
       } else {
-        await axios.put(`http://192.168.0.6:8081/pasos/${id}/editar`, paso);
+        await axios.put(`https://apprecetas-production.up.railway.app/pasos/${id}/editar`, paso);
       }
 
       mostrarToast("Paso guardado correctamente");
@@ -113,7 +113,7 @@ export default function EditarPasosScreen() {
         setPasos(prev => ordenarPorNumero(prev.filter(p => p.id !== null)));
         return;
       }
-      await axios.delete(`http://192.168.0.6:8081/pasos/${id}/eliminar`);
+      await axios.delete(`https://apprecetas-production.up.railway.app/pasos/${id}/eliminar`);
       mostrarToast("Paso eliminado");
       cargarPasos();
     } catch (err) {

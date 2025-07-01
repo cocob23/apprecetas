@@ -12,9 +12,9 @@ import com.example.demo.models.Receta;
 import com.example.demo.models.Usuario;
 
 @Repository
-public interface RecetaRepository extends JpaRepository<Receta, Long> {
+public interface RecetaRepository extends JpaRepository<Receta, Integer> {
 	List<Receta> findByNombreContainingIgnoreCase(String nombre);
-	Optional<Receta> findById(Long id);
+	Optional<Receta> findById(int id);
 	List<Receta> findByTipoIgnoreCase(String tipo);
 	@Query("SELECT r FROM Receta r JOIN RecetaIngrediente ri ON r.id = ri.receta.id JOIN Ingrediente i ON ri.ingrediente.id = i.id WHERE LOWER(i.nombre) LIKE LOWER(CONCAT('%', :nombre, '%'))")
 	List<Receta> findByIngredienteNombre(String nombre);

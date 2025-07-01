@@ -8,7 +8,7 @@ public class Paso {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "receta_id", nullable = false)
@@ -23,8 +23,8 @@ public class Paso {
     private String imagenUrl;
     private String videoUrl;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
     public Receta getReceta() { return receta; }
     public void setReceta(Receta receta) { this.receta = receta; }

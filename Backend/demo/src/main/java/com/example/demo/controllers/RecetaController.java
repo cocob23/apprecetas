@@ -46,7 +46,7 @@ public class RecetaController {
 	RecetaRepository recetaRepository;
 	
 	@PostMapping("/subir")
-	public ResponseEntity<?> subirReceta(@RequestParam Long usuarioId, @RequestBody Receta receta) {
+	public ResponseEntity<?> subirReceta(@RequestParam int usuarioId, @RequestBody Receta receta) {
 	    try {
 	        Receta nuevaReceta = recetaService.subirReceta(
 	            usuarioId,
@@ -67,7 +67,7 @@ public class RecetaController {
 	    return new ResponseEntity<>(recetas, HttpStatus.OK);
 	}
 	@GetMapping("/{id}")
-	public ResponseEntity<?> getRecetaPorId(@PathVariable Long id) {
+	public ResponseEntity<?> getRecetaPorId(@PathVariable Integer id) {
 	    try {
 	        Receta receta = recetaService.obtenerRecetaPorId(id);
 	        return ResponseEntity.ok(receta);
@@ -108,13 +108,13 @@ public class RecetaController {
 	}
 	
 	@PostMapping("/{id}/like")
-	public ResponseEntity<?> darLike(@PathVariable Long id, @RequestParam Long usuarioId) {
+	public ResponseEntity<?> darLike(@PathVariable Integer id, @RequestParam Integer usuarioId) {
 		recetaService.darLike(usuarioId, id); 
 	    return ResponseEntity.ok("Like registrado");
 	}
 	
 	@DeleteMapping("/{id}/dislike")
-	public ResponseEntity<?> quitarLike(@PathVariable Long id, @RequestParam Long usuarioId) {
+	public ResponseEntity<?> quitarLike(@PathVariable Integer id, @RequestParam Integer usuarioId) {
 	    try {
 	        Usuario usuario = usuarioService.findById(usuarioId)
 	            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -132,13 +132,13 @@ public class RecetaController {
 
 
 	@GetMapping("/{id}/likes")
-	public ResponseEntity<?> contarLikes(@PathVariable Long id) {
+	public ResponseEntity<?> contarLikes(@PathVariable Integer id) {
 	    long cantidad = recetaService.contarLikes(id);
 	    return ResponseEntity.ok(cantidad);
 	}
 	
 	@GetMapping("/{id}/liked")
-	public ResponseEntity<Boolean> yaLeDioLike(@PathVariable Long id, @RequestParam Long usuarioId) {
+	public ResponseEntity<Boolean> yaLeDioLike(@PathVariable Integer id, @RequestParam Integer usuarioId) {
 	    Usuario usuario = usuarioService.findById(usuarioId)
 	        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 	    Receta receta = recetaService.obtenerRecetaPorId(id);
@@ -147,7 +147,7 @@ public class RecetaController {
 	}
 	
 	@DeleteMapping("/{id}/eliminar")
-	public ResponseEntity<?> eliminarReceta(@PathVariable Long id) {
+	public ResponseEntity<?> eliminarReceta(@PathVariable Integer id) {
 	    try {
 	        recetaService.eliminarReceta(id);
 	        return ResponseEntity.ok("Receta eliminada con éxito");
@@ -158,14 +158,14 @@ public class RecetaController {
 	
 	@PutMapping("/editar/{id}")
 	public ResponseEntity<?> editarRecetaPut(
-	        @PathVariable Long id,
-	        @RequestParam Long usuarioId,
+	        @PathVariable Integer id,
+	        @RequestParam Integer usuarioId,
 	        @RequestBody Receta recetaActualizada
 	) {
 	    try {
 	        Receta receta = recetaService.obtenerRecetaPorId(id);
 
-	        if (!receta.getUsuario().getId().equals(usuarioId)) {
+	        if (!Integer.valueOf(receta.getUsuario().getId()).equals(usuarioId)) {
 	            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tenés permiso para editar esta receta.");
 	        }
 
@@ -182,7 +182,7 @@ public class RecetaController {
 	}
 	
 	@GetMapping("/mias")
-	public ResponseEntity<?> recetasDelUsuario(@RequestParam Long usuarioId) {
+	public ResponseEntity<?> recetasDelUsuario(@RequestParam Integer usuarioId) {
 	    try {
 	        List<Receta> recetas = recetaService.obtenerRecetasDelUsuario(usuarioId);
 	        return ResponseEntity.ok(recetas);
@@ -191,7 +191,7 @@ public class RecetaController {
 	    }
 	}
 	@GetMapping("/{id}/ingredientes")
-	public List<Map<String, String>> obtenerIngredientesDeReceta(@PathVariable Long id) {
+	public List<Map<String, String>> obtenerIngredientesDeReceta(@PathVariable Integer id) {
 	    List<RecetaIngrediente> lista = recetaIngredienteRepository.findByRecetaId(id);
 	    return lista.stream().map(ri -> {
 	        Map<String, String> map = new HashMap<>();
@@ -210,13 +210,13 @@ public class RecetaController {
 	}
 
 	@GetMapping("/no-contienen")
-	public ResponseEntity<List<Receta>> buscarPorIngredientesExcluidos(@RequestParam List<Long> ids) {
+	public ResponseEntity<List<Receta>> buscarPorIngredientesExcluidos(@RequestParam List<Integer> ids) {
 	    List<Receta> recetas = recetaService.buscarPorIngredientes(ids, false);
 	    return ResponseEntity.ok(recetas);
 	}
 
 	@GetMapping("/contienen")
-	public ResponseEntity<List<Receta>> buscarPorIngredientesIncluidos(@RequestParam List<Long> ids) {
+	public ResponseEntity<List<Receta>> buscarPorIngredientesIncluidos(@RequestParam List<Integer> ids) {
 	    List<Receta> recetas = recetaService.buscarPorIngredientes(ids, true);
 	    return ResponseEntity.ok(recetas);
 	}

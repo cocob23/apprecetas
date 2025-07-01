@@ -20,7 +20,7 @@ export default function AutoresScreen() {
 
   useEffect(() => {
     axios
-      .get('http://192.168.0.6:8081/usuarios/todos')
+      .get('https://apprecetas-production.up.railway.app/usuarios/todos')
       .then((res) => setAutores(res.data))
       .catch((err) => console.error('Error al cargar autores:', err));
   }, []);
@@ -28,7 +28,7 @@ export default function AutoresScreen() {
   const cargarRecetasDelAutor = async (usuarioId) => {
     setLoading(true);
     try {
-      const res = await axios.get('http://192.168.0.6:8081/recetas/mias', {
+      const res = await axios.get('https://apprecetas-production.up.railway.app/recetas/mias', {
         params: { usuarioId },
       });
       setRecetas(res.data);

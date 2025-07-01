@@ -82,7 +82,7 @@ public class UsuarioController {
 	}
 	
 	@PutMapping("/{id}/foto")
-	public ResponseEntity<?> actualizarFoto(@PathVariable Long id, @RequestParam String url) {
+	public ResponseEntity<?> actualizarFoto(@PathVariable Integer id, @RequestParam String url) {
 	    Optional<Usuario> optionalUsuario = usuarioService.findById(id);
 	    if (optionalUsuario.isPresent()) {
 	        Usuario usuario = optionalUsuario.get();
@@ -95,7 +95,7 @@ public class UsuarioController {
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<?> obtenerUsuario(@PathVariable Long id) {
+	public ResponseEntity<?> obtenerUsuario(@PathVariable Integer id) {
 	    Optional<Usuario> usuario = usuarioService.findById(id);
 	    return usuario.isPresent() ? ResponseEntity.ok(usuario.get()) : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
 	}

@@ -27,7 +27,7 @@ public class ComentarioService {
     @Autowired
     RecetaRepository recetaRepository;
 
-    public ComentarioRespuestaDTO agregarComentario(Long usuarioId, Long recetaId, String texto) {
+    public ComentarioRespuestaDTO agregarComentario(int usuarioId, int recetaId, String texto) {
         Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         Receta receta = recetaRepository.findById(recetaId).orElseThrow(() -> new RuntimeException("Receta no encontrada"));
 
@@ -68,18 +68,18 @@ public class ComentarioService {
             .toList();
     }
 
-    public void aprobarComentario(Long id) {
+    public void aprobarComentario(int id) {
         Comentario c = comentarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Comentario no encontrado"));
         c.setAprobado(true);
         comentarioRepository.save(c);
     }
 
-    public void eliminarComentario(Long id) {
+    public void eliminarComentario(int id) {
         comentarioRepository.deleteById(id);
     }
     
 
-public List<ComentarioRespuestaDTO> obtenerAprobadosPorReceta(Long recetaId) {
+public List<ComentarioRespuestaDTO> obtenerAprobadosPorReceta(int recetaId) {
     List<Comentario> comentarios = comentarioRepository.findByRecetaIdAndAprobadoTrue(recetaId);
     return comentarios.stream()
     		.map(c -> new ComentarioRespuestaDTO(

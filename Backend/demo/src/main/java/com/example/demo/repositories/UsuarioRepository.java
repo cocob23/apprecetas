@@ -7,7 +7,7 @@ import com.example.demo.models.Usuario;
 
 
 
-public interface UsuarioRepository extends JpaRepository <Usuario, Long>{
+public interface UsuarioRepository extends JpaRepository <Usuario, Integer>{
 	Optional<Usuario> findByMail(String mail);
 	Optional<Usuario> findByCodigoReset(String codigoReset);
 	Optional<Usuario> findByMailAndClave(String mail, String clave);

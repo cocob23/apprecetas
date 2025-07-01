@@ -46,7 +46,7 @@ public class RecetaService {
         this.likeRecetaRepository = likeRecetaRepository;
     }
 
-    public Receta subirReceta(Long usuarioId, String nombre, String descripcion, Integer porciones, String tipo, String imagenUrl) {
+    public Receta subirReceta(int usuarioId, String nombre, String descripcion, Integer porciones, String tipo, String imagenUrl) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("usuario no encontrado"));
 
@@ -66,7 +66,7 @@ public class RecetaService {
     public List<Receta> buscarPorNombre(String nombre) {
         return recetaRepository.findByNombreContainingIgnoreCase(nombre);
     }
-    public Receta obtenerRecetaPorId(Long id) {
+    public Receta obtenerRecetaPorId(int id) {
         return recetaRepository.findById(id)
             .orElseThrow(() -> new NoSuchElementException("Receta no encontrada"));
     }
@@ -79,7 +79,7 @@ public class RecetaService {
     }
 
     
-    public RecetaIngrediente agregarIngrediente(Long recetaId, Long ingredienteId, String cantidad) {
+    public RecetaIngrediente agregarIngrediente(int recetaId, int ingredienteId, String cantidad) {
         Receta receta = recetaRepository.findById(recetaId)
                 .orElseThrow(() -> new NoSuchElementException("Receta no encontrada"));
 
@@ -98,7 +98,7 @@ public class RecetaService {
         return recetaRepository.findTop5ByOrderByFechaCreacionDesc();
     }
 
-    public void darLike(Long usuarioId, Long recetaId) {
+    public void darLike(int usuarioId, int recetaId) {
         Receta receta = recetaRepository.findById(recetaId)
             .orElseThrow(() -> new NoSuchElementException("Receta no encontrada"));
 
@@ -125,13 +125,13 @@ public class RecetaService {
     }
 
 
-    public long contarLikes(Long recetaId) {
+    public long contarLikes(int recetaId) {
         Receta receta = recetaRepository.findById(recetaId).orElseThrow();
         return likeRecetaRepository.countByReceta(receta);
     }
     
     @Transactional
-    public void eliminarReceta(Long id) {
+    public void eliminarReceta(int id) {
         Receta receta = recetaRepository.findById(id)
             .orElseThrow(() -> new NoSuchElementException("Receta no encontrada"));
 
@@ -139,7 +139,7 @@ public class RecetaService {
         recetaRepository.delete(receta); // ahora sí, podés eliminar la receta
     }
     
-    public Receta editarReceta(Long id, Receta datosNuevos) {
+    public Receta editarReceta(int id, Receta datosNuevos) {
         Receta receta = recetaRepository.findById(id)
             .orElseThrow(() -> new NoSuchElementException("Receta no encontrada"));
 
@@ -159,14 +159,14 @@ public class RecetaService {
         return likeRecetaRepository.existsByUsuarioAndReceta(usuario, receta);
     }
 
-    public List<Receta> obtenerRecetasDelUsuario(Long usuarioId) {
+    public List<Receta> obtenerRecetasDelUsuario(int usuarioId) {
         Usuario usuario = usuarioService.findById(usuarioId)
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         return recetaRepository.findByUsuario(usuario);
     }
 
-    public List<Receta> buscarPorIngredientes(List<Long> ids, boolean incluir) {
+    public List<Receta> buscarPorIngredientes(List<Integer> ids, boolean incluir) {
         List<RecetaIngrediente> relaciones = recetaIngredienteRepository.findAll();
 
 
@@ -174,7 +174,7 @@ public class RecetaService {
             .collect(Collectors.groupingBy(ri -> ri.getReceta()))
             .entrySet().stream()
             .filter(entry -> {
-                List<Long> idsEnReceta = entry.getValue().stream()
+                List<Integer> idsEnReceta = entry.getValue().stream()
                     .map(ri -> ri.getIngrediente().getId())
                     .collect(Collectors.toList());
 

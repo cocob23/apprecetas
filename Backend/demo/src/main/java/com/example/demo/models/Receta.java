@@ -13,7 +13,7 @@ public class Receta {
     
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
@@ -44,7 +44,7 @@ public class Receta {
     @JsonManagedReference
     private List<RecetaIngrediente> ingredientes;
 
-    public Receta(Long id, Usuario usuario, String imageUrl,String nombre, String descripcion, Integer porciones, LocalDateTime fechaCreacion, Boolean aprobada) {
+    public Receta(int id, Usuario usuario, String imageUrl,String nombre, String descripcion, Integer porciones, LocalDateTime fechaCreacion, Boolean aprobada) {
         this.id = id;
         this.usuario = usuario;
         this.imagenUrl = imagenUrl;
@@ -60,8 +60,8 @@ public class Receta {
         // constructor vacío necesario para JPA
     }
 
-    public Long getId() {return id;}
-    public void setId(Long id) {this.id = id;}
+    public int getId() {return id;}
+    public void setId(int id) {this.id = id;}
 
     public Usuario getUsuario() {return usuario;}
     public void setUsuario(Usuario usuario) {this.usuario = usuario;}

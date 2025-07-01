@@ -67,7 +67,7 @@ export default function NuevaRecetaScreen() {
       }
 
       const res = await axios.post(
-        `http://192.168.0.232:8081/recetas/subir`,
+        `https://apprecetas-production.up.railway.app/recetas/subir`,
         {
           nombre,
           descripcion,

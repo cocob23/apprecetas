@@ -59,11 +59,11 @@ export default function PerfilScreen() {
 
         const url = res.data.data.link;
 
-        await axios.put(`http://192.168.0.6:8081/usuarios/${usuario.id}/foto`, null, {
+        await axios.put(`https://apprecetas-production.up.railway.app/usuarios/${usuario.id}/foto`, null, {
           params: { url }
         });
 
-        const resUser = await axios.get(`http://192.168.0.6:8081/usuarios/${usuario.id}`);
+        const resUser = await axios.get(`https://apprecetas-production.up.railway.app/usuarios/${usuario.id}`);
         setUsuario(resUser.data);
 
         mostrarToast("¡Foto actualizada!");
