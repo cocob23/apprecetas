@@ -34,6 +34,9 @@ export default function DetalleRecetaScreen() {
   const [ingredientes, setIngredientes] = useState([]);
   const [refrescando, setRefrescando] = useState(false);
 
+  const [comensalesBase, setComensalesBase] = useState(1);
+  const [comensalesInput, setComensalesInput] = useState('1');
+
   const mostrarToast = (mensaje) => {
     Toast.show({
       type: 'success',
@@ -80,6 +83,8 @@ export default function DetalleRecetaScreen() {
       setPasos(pasosRes.data);
       setMeGusta(likeExiste);
       setIngredientes(ingredientesRes.data);
+      setComensalesBase(recetaRes.data.porciones || 1);
+      setComensalesInput((recetaRes.data.porciones || 1).toString());
     } catch (error) {
       console.error('Error al cargar los datos:', error);
       mostrarToast("Error al cargar los datos");
@@ -160,6 +165,9 @@ export default function DetalleRecetaScreen() {
     }
   };
 
+  const comensales = parseInt(comensalesInput);
+  const factor = !isNaN(comensales) && comensales > 0 ? comensales / comensalesBase : 1;
+
   if (loading || !receta) {
     return <View style={styles.centered}><ActivityIndicator size="large" color="#31c48d" /></View>;
   }
@@ -200,12 +208,33 @@ export default function DetalleRecetaScreen() {
           </View>
         </View>
 
+        <View style={{ marginTop: 20, marginBottom: 10 }}>
+          <Text style={{ color: '#fff', marginBottom: 5 }}>Cantidad de comensales:</Text>
+          <TextInput
+            value={comensalesInput}
+            onChangeText={setComensalesInput}
+            keyboardType="numeric"
+            style={{
+              backgroundColor: '#222',
+              color: '#fff',
+              padding: 8,
+              borderRadius: 8,
+              width: 100,
+              marginBottom: 10,
+            }}
+          />
+        </View>
+
         <Text style={styles.sectionTitle}>Ingredientes</Text>
-        {ingredientes.map((ing, index) => (
-          <Text key={index} style={{ color: '#eee', marginBottom: 4 }}>
-            • {ing.nombre} ({ing.cantidad})
-          </Text>
-        ))}
+        {ingredientes.map((ing, index) => {
+          const cantidad = parseFloat(ing.cantidad);
+          const escalado = !isNaN(cantidad) ? (cantidad * factor).toFixed(1) : '-';
+          return (
+            <Text key={index} style={{ color: '#eee', marginBottom: 4 }}>
+              • {ing.nombre} ({escalado})
+            </Text>
+          );
+        })}
 
         <Text style={styles.sectionTitle}>Pasos</Text>
         {pasos.map((paso, index) => (
